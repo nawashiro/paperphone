@@ -25,7 +25,7 @@
     <string name="ok">OK</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    <string name="current_location">現在位置</string>
+    <string name="current_location">現在地</string>
     <string name="going_to">目的地</string>
     <string name="maps_instructions">地図と道順を印刷します。</string>
     <string name="global_instructions">タップして、Paper Phoneに印刷\nしたいものを選択します。</string>
