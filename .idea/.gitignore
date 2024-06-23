@@ -1,0 +1,5 @@
+# Default ignored files
+*.xml
+!/gradle.xml
+!/misc.xml
+!/compiler.xml
