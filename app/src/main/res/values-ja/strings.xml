@@ -1,0 +1,59 @@
+<resources>
+    <string name="app_name">Paper Phone</string>
+    <string name="notes">Notes</string>
+    <string name="maps_info">地図と道順を印刷するには、両面印刷に\n対応したプリンターが必要です。</string>
+    <string name="contacts_info">印刷する連絡先を7件まで選択できます。</string>
+    <string name="calendar_info">Paper Phoneに印刷したいカレンダーを\n選択します。</string>
+    <string name="weather_info">今日の天気予報を追加します。</string>
+    <string name="tasks_info">Paper Phoneに印刷したいタスクリストを選択します。</string>
+    <string name="notes_info">あなたのPaper Phoneに\n空きスペースが追加され、考えや\nアイデアを記録することができます。</string>
+    <string name="photos_info">スクリーンショットまたは写真を\nPaper Phoneに追加します</string>
+    <string name="contactless_info">Paper Phoneにカットマークが\n追加されます。</string>
+    <string name="paper_apps_info">Paper Appを選んで\nPaper Phoneに追加します。</string>
+    <string name="item_calendar">Calendar</string>
+    <string name="item_contacts">Contacts</string>
+    <string name="item_maps">Maps</string>
+    <string name="item_tasks">Tasks</string>
+    <string name="item_photos">Photos</string>
+    <string name="item_weather">Weather</string>
+    <string name="item_contactless">Contactless</string>
+    <string name="item_paperapps">Paper Apps</string>
+    <string name="create_pdf">PDFを作成</string>
+    <string name="folding_instructions_label">折りたたみ方法</string>
+    <string name="next">Next</string>
+    <string name="your_name">YOUR NAME</string>
+    <string name="ok">OK</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="current_location">現在地</string>
+    <string name="going_to">目的地</string>
+    <string name="maps_instructions">地図と道順を印刷します。</string>
+    <string name="global_instructions">タップして、Paper Phoneに印刷\nしたいものを選択します。</string>
+    <string name="print_from_phone">スマホから印刷</string>
+    <string name="print">PRINT</string>
+    <string name="folding">折りたたむ</string>
+    <string name="folding_instructions">折り方は、ページマップを上にして、\nページ下部の2つの丸が触れるように\n半分に折り、四角が触れるように\nもう一度半分に折ってから、\n最後にもう一度半分に折ってください。</string>
+    <string name="done">Done</string>
+    <string name="choose_gaccount">使用するGoogleアカウントを\n選択してください。</string>
+    <string name="onboarding_folding">
+        この実験では、あなたの一日で\n一番大事なことを、\n小さな紙の電話に印刷します。
+    </string>
+    <string name="onboarding_selecting">Paper Phoneに載せたい情報を\n選んで、printを押すだけ。
+    </string>
+    <string name="onboarding_welcome">デジタルの世界から離れて\n一息つくのに役立つ、\n印刷可能なPaper Phone。</string>
+    <string name="calendar_permission_rationale">
+        Paper Phoneに\nカレンダーのエントリーを\n入れたい場合は、\nこのアプリがカレンダーに\nアクセスできるように\nする必要があります。
+    </string>
+    <string name="contacts_permission_rationale">
+        Paper Phoneに\n連絡先エントリを含めたい\n場合は、このアプリが\n連絡先にアクセスできる\nようにする必要があります。
+    </string>
+    <string name="location_permission_rationale">
+        Paper Phoneに道順を表示\nするには、このアプリが\nあなたの位置情報にアクセス\nできるようにする\n必要があります。
+    </string>
+    <string name="storage_permission_rationale">
+        Paper Phoneに\nスクリーンショットや写真を\n含めるには、このアプリが\nデバイス上の写真に\nアクセスできるようにする\n必要があります。
+    </string>
+    <string name="rationale_area">%s\n\nこれは設定からできます。\n\n今すぐやりますか？</string>
+
+    <string name="filename">%1$s\'s Paper Phone - %2$s</string>
+</resources>

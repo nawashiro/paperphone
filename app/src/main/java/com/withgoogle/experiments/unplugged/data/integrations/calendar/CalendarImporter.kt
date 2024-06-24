@@ -9,7 +9,7 @@ import com.withgoogle.experiments.unplugged.model.Calendar
 import com.withgoogle.experiments.unplugged.model.Event
 import timber.log.Timber
 import java.time.LocalDate
-import java.time.ZoneOffset
+import java.time.ZonedDateTime
 
 class CalendarImporter(val context: Context) {
     private val CALENDAR_PROJECTION = arrayOf(
@@ -54,11 +54,13 @@ class CalendarImporter(val context: Context) {
 
         val calendarId = cursor.getLong(0)
 
-        val beginDay = LocalDate.now().atStartOfDay().toInstant(
-            ZoneOffset.UTC).toEpochMilli()
+        val now = LocalDate.now()
 
-        val endDay = LocalDate.now().atTime(23, 59, 59).toInstant(
-            ZoneOffset.UTC).toEpochMilli()
+        val offset = ZonedDateTime.now().getOffset()
+
+        val beginDay = ZonedDateTime.parse("${now}T00:00:00${offset}").toInstant().toEpochMilli()
+
+        val endDay = ZonedDateTime.parse("${now}T23:59:59${offset}").toInstant().toEpochMilli()
 
         val selection = "${CalendarContract.Events.CALENDAR_ID} = $calendarId AND (${CalendarContract.Events.DTSTART} >= $beginDay AND ${CalendarContract.Events.DTEND} <= $endDay)"
 
@@ -85,11 +87,13 @@ class CalendarImporter(val context: Context) {
     fun events(calendarId: Long): List<Event> {
         val uri: Uri = CalendarContract.Events.CONTENT_URI
 
-        val beginDay = LocalDate.now().atStartOfDay().toInstant(
-            ZoneOffset.UTC).toEpochMilli()
+        val now = LocalDate.now()
 
-        val endDay = LocalDate.now().atTime(23, 59, 59).toInstant(
-            ZoneOffset.UTC).toEpochMilli()
+        val offset = ZonedDateTime.now().getOffset()
+
+        val beginDay = ZonedDateTime.parse("${now}T00:00:00${offset}").toInstant().toEpochMilli()
+
+        val endDay = ZonedDateTime.parse("${now.plusDays(1)}T00:00:00${offset}").toInstant().toEpochMilli()
 
         val selection = "${CalendarContract.Events.CALENDAR_ID} = $calendarId AND (${CalendarContract.Events.DTSTART} >= $beginDay AND ${CalendarContract.Events.DTEND} <= $endDay)"
 

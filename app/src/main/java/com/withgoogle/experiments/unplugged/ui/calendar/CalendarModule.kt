@@ -8,8 +8,9 @@ import com.withgoogle.experiments.unplugged.R
 import com.withgoogle.experiments.unplugged.model.Event
 import com.withgoogle.experiments.unplugged.ui.PdfModule
 import com.withgoogle.experiments.unplugged.ui.pdf.MODULE_WIDTH
-import com.withgoogle.experiments.unplugged.util.toTime
 import java.time.Instant
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 class CalendarModule(private val events: List<Event>): PdfModule {
     override suspend fun setupData() {
@@ -67,7 +68,10 @@ class CalendarModule(private val events: List<Event>): PdfModule {
             canvas.drawText(events[i].title.substring(0, subString), 0F, eventHeight, eventTextPaint)
 
             canvas.translate(0F, 8F)
-            canvas.drawText("${dateStart.toTime()} - ${dateEnd.toTime()}", 0F, timeHeight, timeTextPaint)
+            var offset = ZonedDateTime.now().getOffset()
+            canvas.drawText("${dateStart.atZone(offset).format(
+                DateTimeFormatter.ofPattern("HH:mm"))} - ${dateEnd.atZone(offset).format(
+                DateTimeFormatter.ofPattern("HH:mm"))}", 0F, timeHeight, timeTextPaint)
         }
     }
 
