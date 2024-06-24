@@ -34,8 +34,8 @@ class GoogleDirections {
 
                 val mapBuilder = staticMapUrl.newBuilder()
                     .addEncodedQueryParameter("size", "494x494")
-                    .addEncodedQueryParameter("markers", "icon:https://media.designersfriend.co.uk/sps/media/uploads/work/media/a-extra-small-38891.png|$origin")
-                    .addEncodedQueryParameter("markers", "icon:https://media.designersfriend.co.uk/sps/media/uploads/work/media/b-extra-small-38903.png|$destination")
+                    .addEncodedQueryParameter("markers", "color:0x000000|label:A|$origin")
+                    .addEncodedQueryParameter("markers", "color:0x000000|label:B|$destination")
                     .addQueryParameter("key", BuildConfig.GMAPS_API_KEY)
 
                 if (result.routes.isNotEmpty()) {
@@ -43,7 +43,7 @@ class GoogleDirections {
 
                     Timber.d(encodedPolyline)
 
-                    mapBuilder.addEncodedQueryParameter("path", "weight:2|color:black|enc:$encodedPolyline")
+                    mapBuilder.addEncodedQueryParameter("path", "weight:2|color:0x000000ff|enc:$encodedPolyline")
                 }
 
                 mapBuilder.build().toString()
