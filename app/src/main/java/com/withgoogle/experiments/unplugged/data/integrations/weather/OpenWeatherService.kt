@@ -10,6 +10,9 @@ import okhttp3.HttpUrl
 import okhttp3.Request
 import timber.log.Timber
 import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 class OpenWeatherService {
    private val gson = Gson()
@@ -33,13 +36,15 @@ class OpenWeatherService {
          response.body()?.use {
             val result = gson.fromJson(response.body()?.charStream(), ForecastResult::class.java)
 
+            val offset = ZonedDateTime.now().getOffset()
+
             return result.list.filter {
-               !it.dt_txt.endsWith("03:00:00") and
-                   !it.dt_txt.endsWith("06:00:00") and
-                   !it.dt_txt.endsWith("00:00:00") and
-                   !it.dt_txt.endsWith("15:00:00") and
-                   !it.dt_txt.endsWith("21:00:00") and
-                   it.dt_txt.startsWith(AppState.currentDate.value!!.toString())
+               (it.dt_txt == ZonedDateTime.parse("${AppState.currentDate.value!!}T09:00:00${offset}").withZoneSameInstant(ZoneId.of("UTC")).format(
+                  DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm:ss"))) or
+                       (it.dt_txt == ZonedDateTime.parse("${AppState.currentDate.value!!}T12:00:00${offset}").withZoneSameInstant(ZoneId.of("UTC")).format(
+                          DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm:ss"))) or
+                       (it.dt_txt == ZonedDateTime.parse("${AppState.currentDate.value!!}T18:00:00${offset}").withZoneSameInstant(ZoneId.of("UTC")).format(
+                          DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm:ss")))
             }.map {
                Timber.d(it.dt_txt)
                ThreeHourForecast(

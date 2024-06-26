@@ -18,6 +18,10 @@ import com.withgoogle.experiments.unplugged.util.weatherFormat
 import java.time.LocalDate
 import android.graphics.drawable.VectorDrawable
 import androidx.core.graphics.withSave
+import com.withgoogle.experiments.unplugged.ui.AppState
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 private const val ICON_SIZE = 19F
 
@@ -86,8 +90,11 @@ class WeatherModule(
         val descMetrics = descriptionPaint.fontMetrics
         val descHeight = descMetrics.descent - descMetrics.ascent
 
+        val offset = ZonedDateTime.now().getOffset()
+
         forecasts.forEach { threeHourForecast ->
-            val time = threeHourForecast.timestamp.toTime()
+            val time = threeHourForecast.timestamp.atZone(offset).format(
+                DateTimeFormatter.ofPattern("HH:mm"))
 
             with(canvas) {
                 drawText(getTimeOfDay(time), 0F, fontHeight, timeOfDayPaint)
