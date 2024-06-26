@@ -13,13 +13,10 @@ import com.withgoogle.experiments.unplugged.data.integrations.weather.WeatherDat
 import com.withgoogle.experiments.unplugged.model.ThreeHourForecast
 import com.withgoogle.experiments.unplugged.ui.PdfModule
 import com.withgoogle.experiments.unplugged.ui.pdf.MODULE_WIDTH
-import com.withgoogle.experiments.unplugged.util.toTime
 import com.withgoogle.experiments.unplugged.util.weatherFormat
 import java.time.LocalDate
 import android.graphics.drawable.VectorDrawable
 import androidx.core.graphics.withSave
-import com.withgoogle.experiments.unplugged.ui.AppState
-import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
