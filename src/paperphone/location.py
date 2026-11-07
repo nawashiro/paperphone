@@ -29,7 +29,11 @@ class LocationFix:
 
 
 class LocationError(RuntimeError):
-    """位置情報を取得できなかった。"""
+    """位置情報を取得できなかった。診断には数値応答のみを保持する。"""
+
+    def __init__(self, message: str, *, response_code: int | None = None) -> None:
+        super().__init__(message)
+        self.response_code = response_code
 
 
 class LocationDenied(LocationError):
@@ -87,9 +91,11 @@ class LocationPortal:
             session = transport.create_session(self._accuracy)
             request = transport.start_session(session)
             response = transport.wait_for_response(request, self._timeout_seconds)
-            if response != 0:
+            if response == 1:
                 self._denied = True
-                raise LocationDenied("位置情報要求が拒否または取消されました。")
+                raise LocationDenied("位置情報要求が拒否または取消されました。", response_code=response)
+            if response != 0:
+                raise LocationUnavailable("位置情報ポータルが要求を完了できませんでした。", response_code=response)
             return transport.wait_for_location(session, self._timeout_seconds)
         except LocationError:
             raise
@@ -119,6 +125,7 @@ class _DBusLocationTransport:
 
     def create_session(self, accuracy: int) -> str:
         options = {
+            "session_handle_token": GLib.Variant("s", "paperphone_" + uuid.uuid4().hex),
             "accuracy": GLib.Variant("u", accuracy),
             "distance-threshold": GLib.Variant("u", 0),
             "time-threshold": GLib.Variant("u", 0),
@@ -143,25 +150,31 @@ class _DBusLocationTransport:
         return self._session
 
     def start_session(self, session: str) -> str:
-        options = {"handle_token": GLib.Variant("s", "paperphone_" + uuid.uuid4().hex)}
-        self._request = self._call(
+        token = "paperphone_" + uuid.uuid4().hex
+        options = {"handle_token": GLib.Variant("s", token)}
+        sender = self._connection.get_unique_name().lstrip(":").replace(".", "_")
+        self._request = f"/org/freedesktop/portal/desktop/request/{sender}/{token}"
+        # Start直後の高速なResponseも取りこぼさないよう、先に購読する。
+        subscription = self._subscribe_response(self._request)
+        returned_request = self._call(
             "Start",
             GLib.Variant("(osa{sv})", (session, self._parent_window, options)),
             GLib.VariantType.new("(o)"),
         )[0]
-        self._subscriptions.append(
-            self._connection.signal_subscribe(
-                PORTAL_NAME,
-                "org.freedesktop.portal.Request",
-                "Response",
-                self._request,
-                None,
-                Gio.DBusSignalFlags.NONE,
-                self._on_response,
-                None,
-            )
-        )
+        if returned_request != self._request:
+            self._connection.signal_unsubscribe(subscription)
+            self._subscriptions.remove(subscription)
+            self._request = returned_request
+            self._subscribe_response(self._request)
         return self._request
+
+    def _subscribe_response(self, request: str) -> int:
+        subscription = self._connection.signal_subscribe(
+            PORTAL_NAME, "org.freedesktop.portal.Request", "Response", request,
+            None, Gio.DBusSignalFlags.NONE, self._on_response, None,
+        )
+        self._subscriptions.append(subscription)
+        return subscription
 
     def wait_for_response(self, request: str, timeout_seconds: int) -> int:
         del request  # The signal subscription is already bound to the request path.
@@ -224,8 +237,7 @@ class _DBusLocationTransport:
     def _on_response(self, _connection, _sender, _path, _interface, _signal, parameters, _data) -> None:
         response, _results = parameters.unpack()
         self._response = int(response)
-        if self._response != 0 or self._fix is not None:
-            self._loop.quit()
+        self._loop.quit()
 
     def _on_location_updated(self, _connection, _sender, _path, _interface, _signal, parameters, _data) -> None:
         session, location = parameters.unpack()

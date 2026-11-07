@@ -55,6 +55,7 @@ python.install_sources(
     'src/paperphone/todo.py',
     'src/paperphone/todo_reader.py',
     'src/paperphone/todo_selection.py',
+    'src/paperphone/weather.py',
   ),
   subdir: 'paperphone',
 )
