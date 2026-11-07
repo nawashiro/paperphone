@@ -7,3 +7,5 @@
 .externalNativeBuild
 /keys.properties
 .idea
+__pycache__/
+*.py[cod]

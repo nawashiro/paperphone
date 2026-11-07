@@ -1,0 +1,33 @@
+schema: spec-driven
+
+context: |
+  Project: Paper Phone is an Android app that creates printable booklets to help users take a break from their phones.
+  Codebase: Kotlin Android app in the `app/` Gradle module. The UI uses XML layouts and Android resources.
+  Product areas: booklet printing and PDFs, contacts, calendars, tasks, maps, weather, notes, and photos.
+  User-facing text: keep English strings in `app/src/main/res/values/strings.xml` and Japanese strings in `app/src/main/res/values-ja/strings.xml` in sync when changing copy.
+  Implementation: follow existing project patterns and keep changes compatible with the current Android and Gradle setup unless the change explicitly updates them.
+  Language: Japanese
+  All artifacts must be written in Japanese.
+  Keep OpenSpec structural headings and SHALL/MUST keywords in English.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing

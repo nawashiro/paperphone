@@ -1,0 +1,340 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: paperphone 0.1.0\n"
+"Last-Translator: Paper Phone contributors\n"
+"PO-Revision-Date: 2026-11-07 00:00+0000\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: src/paperphone/main.py
+msgid "Create, preview, save, and print your paper booklet."
+msgstr "紙の冊子を作成して、プレビュー・保存・印刷します。"
+
+#: src/paperphone/main.py
+msgid "GNOME startup foundation"
+msgstr "GNOME版の起動基盤"
+
+#: src/paperphone/main.py
+msgid "Start preparing"
+msgstr "準備を始める"
+
+#: src/paperphone/main.py
+msgid "Startup check complete."
+msgstr "起動を確認しました。"
+
+#: src/paperphone/contact_selection.py
+msgid "Select up to 7 contacts."
+msgstr "印刷する連絡先を7件まで選択できます。"
+
+#: src/paperphone/contact_selection.py
+msgid "You can select up to 7 contacts."
+msgstr "連絡先は7件まで選択できます。"
+
+#: src/paperphone/contact_selection.py
+msgid "No contacts with phone numbers are available."
+msgstr "電話番号がある連絡先はありません。"
+
+#: src/paperphone/todo_selection.py
+msgid "Today"
+msgstr "今日"
+
+#: src/paperphone/todo_selection.py
+msgid "Upcoming"
+msgstr "今後"
+
+#: src/paperphone/todo_selection.py
+msgid "No due date"
+msgstr "期限なし"
+
+#: src/paperphone/todo_selection.py
+msgid "No tasks in this category."
+msgstr "この分類にタスクはありません。"
+
+#: src/paperphone/todo_selection.py
+msgid "Untitled task"
+msgstr "無題のタスク"
+
+#: src/paperphone/todo_selection.py
+msgid "Starts: {when}"
+msgstr "着手: {when}"
+
+#: src/paperphone/todo_selection.py
+msgid "Due: {when}"
+msgstr "期限: {when}"
+
+#: src/paperphone/todo_selection.py
+msgid "Overdue"
+msgstr "期限切れ"
+
+#: src/paperphone/refresh_view.py
+msgid "Refresh selected sources"
+msgstr "選択したデータソースを更新"
+
+#: src/paperphone/refresh_view.py
+msgid "Cancel"
+msgstr "キャンセル"
+
+#: src/paperphone/refresh_view.py
+msgid "Not refreshed yet."
+msgstr "まだ更新していません。"
+
+#: src/paperphone/refresh_view.py
+msgid "Reading selected sources…"
+msgstr "選択したデータソースを読み込み中…"
+
+#: src/paperphone/refresh_view.py
+msgid "Refresh could not be started."
+msgstr "更新を開始できませんでした。"
+
+#: src/paperphone/refresh_view.py
+msgid "Refresh cancelled."
+msgstr "更新をキャンセルしました。"
+
+#: src/paperphone/refresh_view.py
+msgid "Some sources could not be read."
+msgstr "読み取れないデータソースがあります。"
+
+#: src/paperphone/refresh_view.py
+msgid "Refresh complete."
+msgstr "更新が完了しました。"
+
+#: src/paperphone/refresh_view.py
+msgid "CalDAV changes were not confirmed. Cached tasks may be shown."
+msgstr "CalDAVの変更を確認できませんでした。保存済みのタスクが表示される場合があります。"
+
+#: Android string resource app_name
+msgid "Paper Phone"
+msgstr "Paper Phone"
+
+#: Android string resource notes
+msgid "Notes"
+msgstr "Notes"
+
+#: Android string resource maps_info
+msgid "Printing maps and directions\nrequires a printer which supports\ndouble sided printing"
+msgstr "地図と道順を印刷するには、両面印刷に\n対応したプリンターが必要です。"
+
+#: Android string resource contacts_info
+msgid "Choose up to 7 contacts to print\non your Paper Phone"
+msgstr "印刷する連絡先を7件まで選択できます。"
+
+#: Android string resource calendar_info
+msgid "Choose the calendars you want\nto print to your Paper Phone"
+msgstr "Paper Phoneに印刷したいカレンダーを\n選択します。"
+
+#: Android string resource weather_info
+msgid "Add a weather report for today"
+msgstr "今日の天気予報を追加します。"
+
+#: Android string resource tasks_info
+msgid "Choose the task lists you want\nto print to your Paper Phone"
+msgstr "Paper Phoneに印刷したいタスクリストを選択します。"
+
+#: Android string resource notes_info
+msgid "An empty space will be added to your\nPaper Phone to capture\nthoughts and ideas"
+msgstr "あなたのPaper Phoneに\n空きスペースが追加され、考えや\nアイデアを記録することができます。"
+
+#: Android string resource photos_info
+msgid "Add a screenshot or\npicture to your Paper Phone"
+msgstr "スクリーンショットまたは写真を\nPaper Phoneに追加します"
+
+#: Android string resource contactless_info
+msgid "Cut marks will be added to\nyour Paper Phone for you\nto store a contactless card"
+msgstr "Paper Phoneにカットマークが\n追加されます。"
+
+#: Android string resource paper_apps_info
+msgid "Choose a Paper App to print\nto your Paper Phone"
+msgstr "Paper Appを選んで\nPaper Phoneに追加します。"
+
+#: Android string resource item_calendar
+msgid "Calendar"
+msgstr "Calendar"
+
+#: src/paperphone/contact_selection.py
+#: Android string resource item_contacts
+msgid "Contacts"
+msgstr "連絡先"
+
+#: Android string resource item_maps
+msgid "Maps"
+msgstr "Maps"
+
+#: Android string resource item_tasks
+msgid "Tasks"
+msgstr "Tasks"
+
+#: Android string resource item_photos
+msgid "Photos"
+msgstr "Photos"
+
+#: Android string resource item_weather
+msgid "Weather"
+msgstr "Weather"
+
+#: Android string resource item_contactless
+msgid "Contactless"
+msgstr "Contactless"
+
+#: Android string resource item_paperapps
+msgid "Paper Apps"
+msgstr "Paper Apps"
+
+#: Android string resource create_pdf
+msgid "Create PDF"
+msgstr "PDFを作成"
+
+#: Android string resource folding_instructions_label
+msgid "Folding Instructions"
+msgstr "折りたたみ方法"
+
+#: Android string resource next
+msgid "Next"
+msgstr "Next"
+
+#: Android string resource your_name
+msgid "YOUR NAME"
+msgstr "YOUR NAME"
+
+#: Android string resource ok
+msgid "OK"
+msgstr "OK"
+
+#: Android string resource yes
+msgid "Yes"
+msgstr "Yes"
+
+#: Android string resource no
+msgid "No"
+msgstr "No"
+
+#: Android string resource current_location
+msgid "Current Location"
+msgstr "現在地"
+
+#: Android string resource going_to
+msgid "Going to"
+msgstr "目的地"
+
+#: Android string resource maps_instructions
+msgid "Print maps and directions onto\nthe back of your Paper Phone"
+msgstr "地図と道順を印刷します。"
+
+#: Android string resource global_instructions
+msgid "Tap to select the things you want\nto print to your Paper Phone"
+msgstr "タップして、Paper Phoneに印刷\nしたいものを選択します。"
+
+#: Android string resource print_from_phone
+msgid "PRINT FROM PHONE"
+msgstr "スマホから印刷"
+
+#: Android string resource print
+msgid "PRINT"
+msgstr "PRINT"
+
+#: Android string resource folding
+msgid "FOLDING"
+msgstr "折りたたむ"
+
+#: Android string resource folding_instructions
+msgid "To fold your phone, lay the page map\nside up and fold it in half so the two\n\nlittle circles at the bottom of the page\ntouch\n\nThen fold in half again so the squares\nare touching\n\nThen fold\nin half one last time\n\nIf you would like to keep a contactless card\ninside your Paper Phone then please carefully\ncut along the dotted diagonal lines."
+msgstr "折り方は、ページマップを上にして、\nページ下部の2つの丸が触れるように\n半分に折り、四角が触れるように\nもう一度半分に折ってから、\n最後にもう一度半分に折ってください。"
+
+#: Android string resource done
+msgid "Done"
+msgstr "Done"
+
+#: Android string resource choose_gaccount
+msgid "Please choose the Google\naccount you wish to use"
+msgstr "使用するGoogleアカウントを\n選択してください。"
+
+#: Android string resource onboarding_folding
+msgid "This experiment prints a\nlittle paper phone with the\nmost important information\nyou'll need for the day"
+msgstr "この実験では、あなたの一日で\n一番大事なことを、\n小さな紙の電話に印刷します。"
+
+#: Android string resource onboarding_selecting
+msgid "Just choose the information\nyou would like to include on\nyour Paper Phone and\n\nhit print"
+msgstr "Paper Phoneに載せたい情報を\n選んで、printを押すだけ。"
+
+#: Android string resource onboarding_welcome
+msgid "A printable Paper Phone which\nhelps you take a break away\nfrom your digital world"
+msgstr "デジタルの世界から離れて\n一息つくのに役立つ、\n印刷可能なPaper Phone。"
+
+#: Android string resource calendar_permission_rationale
+msgid "If you would like to include calendar entries on your Paper Phone you will need to allow this app to access your calendar."
+msgstr "Paper Phoneに\nカレンダーのエントリーを\n入れたい場合は、\nこのアプリがカレンダーに\nアクセスできるように\nする必要があります。"
+
+#: Android string resource contacts_permission_rationale
+msgid "If you would like to include contacts entries on your Paper Phone you will need to allow this app to access your contacts."
+msgstr "Paper Phoneに\n連絡先エントリを含めたい\n場合は、このアプリが\n連絡先にアクセスできる\nようにする必要があります。"
+
+#: Android string resource location_permission_rationale
+msgid "In order to include directions on your Paper Phone you will need to allow this app to access your location."
+msgstr "Paper Phoneに道順を表示\nするには、このアプリが\nあなたの位置情報にアクセス\nできるようにする\n必要があります。"
+
+#: Android string resource storage_permission_rationale
+msgid "In order to include screenshots and photos on your Paper Phone you will need to allow this app to access the pictures on your device."
+msgstr "Paper Phoneに\nスクリーンショットや写真を\n含めるには、このアプリが\nデバイス上の写真に\nアクセスできるようにする\n必要があります。"
+
+#: Android string resource rationale_area
+msgid "%s\n\nYou can do this in the settings.\n\nWould you like to do this now?"
+msgstr "%s\n\nこれは設定からできます。\n\n今すぐやりますか？"
+
+#: Android string resource filename
+msgid "%1$s's Paper Phone - %2$s"
+msgstr "%1$s's Paper Phone - %2$s"
+
+#: Android paper-app name
+msgid "Conversion Charts"
+msgstr "換算表"
+
+#: Android paper-app name
+msgid "Knots"
+msgstr "結び方"
+
+#: Android paper-app name
+msgid "Italian Phrasebook"
+msgstr "イタリア語会話"
+
+#: Android paper-app name
+msgid "Sign Language"
+msgstr "手話"
+
+#: Android paper-app name
+msgid "Multiplication Table"
+msgstr "九九表"
+
+#: Android paper-app name
+msgid "Recipe"
+msgstr "レシピ"
+
+#: Android paper-app name
+msgid "Origami Pigeon"
+msgstr "折り紙の鳩"
+
+#: Android paper-app name
+msgid "Sudoku"
+msgstr "数独"
+
+#: Android paper-app name
+msgid "Maze"
+msgstr "迷路"
+
+#: Android paper-app name
+msgid "Word of the day"
+msgstr "今日の言葉"
+
+#: Android paper-app name
+msgid "Anagram"
+msgstr "アナグラム"
+
+#: Android paper-app name
+msgid "Riddle"
+msgstr "なぞなぞ"
+
+#: Android paper-app name
+msgid "Typography"
+msgstr "タイポグラフィ"

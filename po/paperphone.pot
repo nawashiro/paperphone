@@ -1,0 +1,86 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the paperphone package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: paperphone\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-07 16:35+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/paperphone/main.py:58
+msgid "Create, preview, save, and print your paper booklet."
+msgstr ""
+
+#: src/paperphone/main.py:63
+msgid "GNOME startup foundation"
+msgstr ""
+
+#: src/paperphone/main.py:64
+msgid "Start preparing"
+msgstr ""
+
+#: src/paperphone/main.py:68
+msgid "Startup check complete."
+msgstr ""
+
+#: src/paperphone/resources.py:37
+msgid "Conversion Charts"
+msgstr ""
+
+#: src/paperphone/resources.py:38
+msgid "Knots"
+msgstr ""
+
+#: src/paperphone/resources.py:39
+msgid "Italian Phrasebook"
+msgstr ""
+
+#: src/paperphone/resources.py:40
+msgid "Sign Language"
+msgstr ""
+
+#: src/paperphone/resources.py:41
+msgid "Multiplication Table"
+msgstr ""
+
+#: src/paperphone/resources.py:42
+msgid "Recipe"
+msgstr ""
+
+#: src/paperphone/resources.py:43
+msgid "Origami Pigeon"
+msgstr ""
+
+#: src/paperphone/resources.py:44
+msgid "Sudoku"
+msgstr ""
+
+#: src/paperphone/resources.py:45
+msgid "Maze"
+msgstr ""
+
+#: src/paperphone/resources.py:46
+msgid "Word of the Day"
+msgstr ""
+
+#: src/paperphone/resources.py:47
+msgid "Anagram"
+msgstr ""
+
+#: src/paperphone/resources.py:48
+msgid "Riddle"
+msgstr ""
+
+#: src/paperphone/resources.py:49
+msgid "Typography"
+msgstr ""

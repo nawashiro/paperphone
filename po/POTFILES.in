@@ -1,0 +1,5 @@
+src/paperphone/contact_selection.py
+src/paperphone/main.py
+src/paperphone/refresh_view.py
+src/paperphone/resources.py
+src/paperphone/todo_selection.py
