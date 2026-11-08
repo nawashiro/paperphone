@@ -40,7 +40,6 @@ class ContactSelectionView(Gtk.Box):
 
         self._limit_message = Gtk.Label(label=_("You can select up to 7 contacts."))
         self._limit_message.set_xalign(0.0)
-        self._limit_message.add_css_class("warning")
         self._limit_message.set_visible(False)
         self.append(self._limit_message)
 
@@ -53,6 +52,8 @@ class ContactSelectionView(Gtk.Box):
         self._list = Gtk.ListBox()
         self._list.set_selection_mode(Gtk.SelectionMode.NONE)
         self._list.add_css_class("boxed-list")
+        self._list.update_property([Gtk.AccessibleProperty.LABEL], [_("Contacts")])
+        title.set_mnemonic_widget(self._list)
         scroller = Gtk.ScrolledWindow()
         scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scroller.set_child(self._list)
@@ -137,6 +138,10 @@ class ContactSelectionView(Gtk.Box):
                 checkbox.set_active(False)
                 self._updating = False
                 self._limit_message.set_visible(True)
+                # 必須状態を読み取り可能にする。中止が必要な既定優先度にする。
+                if Gtk.check_version(4, 14, 0) is None:
+                    self._limit_message.announce(self._limit_message.get_text(),
+                                                 Gtk.AccessibleAnnouncementPriority.HIGH)
                 return
         self._selection.set_selected(key, checkbox.get_active())
         self._limit_message.set_visible(False)

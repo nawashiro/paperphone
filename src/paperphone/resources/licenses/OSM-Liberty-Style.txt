@@ -1,0 +1,49 @@
+OSM Liberty / Mapbox Open Styles: print adaptation design references
+
+Sources checked 2026-11-08:
+https://github.com/maputnik/osm-liberty/blob/gh-pages/style.json
+https://github.com/maputnik/osm-liberty/blob/gh-pages/LICENSE.md
+https://github.com/mapbox/mapbox-gl-styles/blob/master/LICENSE.md
+
+Paper Phone adapts selected water, park, building and minor-road palette/width
+values for Cairo vector printing. It does not bundle style JSON, tile data,
+sprites, Maki icons, Roboto or Mapbox fonts. It does not reproduce the engine's
+pixel output. Alpha values are composited onto a paper background; widths are
+adapted from CSS pixels to print points and the other road hierarchy is original.
+
+Design references:
+- OSM Liberty contributors: https://github.com/maputnik/osm-liberty
+- OpenMapTiles: https://openmaptiles.org/ ; CC BY 4.0
+  https://creativecommons.org/licenses/by/4.0/
+- OSM Bright / Mapbox Open Styles, copyright (c) 2014, Mapbox,
+  all rights reserved; CC BY 3.0 design license
+  https://creativecommons.org/licenses/by/3.0/
+
+The visible design credits and modification notice are retained near the map.
+The OSM database's ODbL attribution is separate from the design references.
+
+BSD notice retained for the referenced style code:
+Mapbox Open Styles are copyright (c) 2014, Mapbox, all rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+* Neither the name of Mapbox nor the names of its contributors may be used to
+  endorse or promote products derived from this software without specific
+  prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

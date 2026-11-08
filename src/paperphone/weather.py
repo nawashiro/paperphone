@@ -18,7 +18,8 @@ import zlib
 
 UTC = timezone.utc
 ENDPOINT = "https://api.met.no/weatherapi/locationforecast/2.0/compact"
-ATTRIBUTION = "MET Norway — excerpted and formatted / 抜粋・整形; CC BY 4.0 https://creativecommons.org/licenses/by/4.0/"
+ATTRIBUTION = "MET Norway — excerpted and formatted / 抜粋・整形; CC BY 4.0"
+ATTRIBUTION_SHORT = "MET Norway · CC-BY 4.0"
 # 再取得の最短間隔。期限欠落・失敗時にも連続要求しない。
 MIN_INTERVAL = timedelta(minutes=10)
 MAX_BODY = 8 * 1024 * 1024

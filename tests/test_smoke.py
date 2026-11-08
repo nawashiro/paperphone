@@ -25,12 +25,12 @@ class LocalizationSmokeTest(unittest.TestCase):
         self.assertEqual(gettext_for("en")(source), source)
         self.assertEqual(
             gettext_for("ja")(source),
-            "紙の冊子を作成して、プレビュー・保存・印刷します。",
+            "紙の冊子を作って、プレビュー・保存・印刷します。",
         )
         with patch.dict(os.environ, {"PAPERPHONE_LANGUAGE": "ja"}):
             self.assertEqual(
                 gettext_for()(source),
-                "紙の冊子を作成して、プレビュー・保存・印刷します。",
+                "紙の冊子を作って、プレビュー・保存・印刷します。",
             )
 
     def test_paper_app_names_are_translated_and_complete(self) -> None:

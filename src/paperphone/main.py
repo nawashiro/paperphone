@@ -1,4 +1,4 @@
-"""GTK 4 / libadwaitaの最小起動ウィンドウ。"""
+"""GTK 4 / libadwaitaのアプリ起動と再利用可能なメイン画面。"""
 
 from __future__ import annotations
 
@@ -8,11 +8,7 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gio, Gtk
-
-from .i18n import gettext_for
-
-_ = gettext_for()
+from gi.repository import Adw, Gio
 
 # 配布用IDはタスク8.3で確定する。ここでは既存Android IDを暫定利用する。
 APPLICATION_ID = "com.withgoogle.experiments.unplugged"
@@ -21,11 +17,14 @@ APPLICATION_ID = "com.withgoogle.experiments.unplugged"
 class PaperPhoneApplication(Adw.Application):
     """GNOME版Paper Phoneのアプリケーション基底。"""
 
-    def __init__(self) -> None:
+    def __init__(self, *, services=None, view_factory=None, application_id=APPLICATION_ID) -> None:
         super().__init__(
-            application_id=APPLICATION_ID,
+            application_id=application_id,
             flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
         )
+        self._services = services
+        self._view_factory = view_factory
+        self._application_id = application_id
 
     def do_activate(self) -> None:
         window = self.props.active_window
@@ -33,47 +32,23 @@ class PaperPhoneApplication(Adw.Application):
             window = Adw.ApplicationWindow(application=self)
             window.set_title("Paper Phone")
             window.set_default_size(900, 640)
-            window.set_content(self._build_content())
+            view = self._build_content()
+            window.set_content(view)
+            window.connect("close-request", lambda _window: self._close_view(view))
+            window.connect("notify::is-active", lambda w, _p: view.refresh_clock() if w.is_active() else None)
         window.present()
 
     @staticmethod
-    def _build_content() -> Adw.ToolbarView:
-        toolbar = Adw.ToolbarView()
-        toolbar.add_top_bar(Adw.HeaderBar())
+    def _close_view(view):
+        view.close()
+        return False
 
-        content = Gtk.Box(
-            orientation=Gtk.Orientation.VERTICAL,
-            spacing=12,
-            halign=Gtk.Align.CENTER,
-            valign=Gtk.Align.CENTER,
-        )
-        content.set_margin_top(32)
-        content.set_margin_bottom(32)
-        content.set_margin_start(32)
-        content.set_margin_end(32)
-
-        title = Gtk.Label(label="Paper Phone")
-        title.add_css_class("title-1")
-        description = Gtk.Label(
-            label=_("Create, preview, save, and print your paper booklet.")
-        )
-        description.set_wrap(True)
-        description.set_justify(Gtk.Justification.CENTER)
-
-        status = Gtk.Label(label=_("GNOME startup foundation"))
-        start_button = Gtk.Button(label=_("Start preparing"))
-        start_button.add_css_class("suggested-action")
-        start_button.connect(
-            "clicked",
-            lambda _button: status.set_text(_("Startup check complete.")),
-        )
-
-        content.append(title)
-        content.append(description)
-        content.append(start_button)
-        content.append(status)
-        toolbar.set_content(content)
-        return toolbar
+    def _build_content(self):
+        from .application_services import ApplicationServices
+        from .application_view import ApplicationView
+        services = self._services or ApplicationServices(application_id=self._application_id)
+        factory = self._view_factory or ApplicationView
+        return factory(services)
 
 
 def main() -> int:

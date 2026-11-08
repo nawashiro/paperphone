@@ -44,6 +44,10 @@ class LocationUnavailable(LocationError):
     """ポータル、サービス、または座標fixを利用できなかった。"""
 
 
+class LocationTimeout(LocationUnavailable):
+    """応答待ちの制限時間を超過した。"""
+
+
 class _PortalTransport(Protocol):
     def create_session(self, accuracy: int) -> str: ...
     def start_session(self, session: str) -> str: ...
@@ -232,7 +236,7 @@ class _DBusLocationTransport:
         if not self._timed_out:
             GLib.source_remove(source_id)
         if self._timed_out:
-            raise LocationUnavailable("位置情報ポータルの応答がタイムアウトしました。")
+            raise LocationTimeout("位置情報ポータルの応答がタイムアウトしました。")
 
     def _on_response(self, _connection, _sender, _path, _interface, _signal, parameters, _data) -> None:
         response, _results = parameters.unpack()

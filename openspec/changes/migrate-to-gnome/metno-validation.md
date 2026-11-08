@@ -81,6 +81,15 @@ Locationforecast compact JSONの直接取得をGNOME Platform 51で実証し、�
 - 修正後のMesonビルド・全127件のテスト、OpenSpec検証が成功した。
 - **タスク2.4完了**。UIでの非同期取得・精度不足表示・時刻選択・紙面出典の統合は後続タスクに残る。
 
+## UI・紙面モデル・出典描画の検証（2026-11-08）
+
+- 5.1では当初誤差半径10kmの制限を実装して試験したが、同じ日（2026-11-08）の追加の利用者判断により撤去した。撤去後はシステムが返す精度値を上限なしで扱う。5.2の時刻選択を用いて実予報時刻・1時間の対象期間・取得時刻・再確認時刻を不変の紙面モデルへ投影した。GTK表示と共通生成スナップショットに同じデータを渡し、9時枠の9時30分予報を9時と偽らない。未知コードは元のコードと未知表示を残す。
+- 既知コードの判定はMET Norway公式weathericonsのlegend.csv（下記）を参照した。画像資源は取り込んでいない。
+- Cairo/Pangoによる天気ブロック描画を追加し、本文と出典の領域を分離した。出典にはMET Norway、抜粋・整形、CC BY 4.0、ライセンス参照URLを含める。本文が収まらない場合は呼出し元へ超過を通知し、帰属自体が収まらない領域ではエラーにする。
+- 合成予報からメモリ内でPDFを生成し、Popplerのテキスト抽出で実時刻・期間・未知コード・出典・ライセンスURLを確認した。小領域での本文超過時も出典を保持することを確認した。実紙の可読性と8区画冊子への配置は7章・8.4で確認する。
+- Expires・Last-Modified/ETag・304・429/Retry-After・期限欠落・通信失敗の既存fixture試験に加え、初回304の拒否、期限不明・期限切れの紙面状態、HTTP層の非保存・非ログ出力を偽transport/streamで検証した。新たな実座標の取得・予報サービスへの実通信はしていない。
+- 翻訳カタログをmsgfmtで生成した上で全171件のunittestが成功した。日本語指定の天気UI・紙面・PDF関連11件も成功した。OpenSpecのタスク5.3・5.4に対応する部品の検証であり、全画面統合・冊子レイアウト・配布環境の完了を意味しない。
+
 ## 参照
 
 - XDG Location portal: https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.Location.html
@@ -89,3 +98,4 @@ Locationforecast compact JSONの直接取得をGNOME Platform 51で実証し、�
 - libgweather識別情報・キャッシュ実装（実証版）: https://gitlab.gnome.org/GNOME/libgweather/-/blob/4.6.0/libgweather/gweather-info.c
 - MET Norway Locationforecast data model: https://api.met.no/doc/locationforecast/datamodel
 - MET Norway Terms of Service: https://api.met.no/doc/TermsOfService
+- MET Norway weathericons legend: https://github.com/metno/weathericons/blob/main/weather/legend.csv

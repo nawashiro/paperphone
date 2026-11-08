@@ -1,0 +1,12 @@
+{
+  "source": "movisda extracts https://osm.download.movisda.io/ 公開メタデータのみ",
+  "url_path": "/admin/JP-13-latest.osm.pbf",
+  "recorded_at_utc": "2026-11-07T20:01:50Z",
+  "headers": {
+    "Content-Disposition": "attachment; filename=\"JP-13-202611070100.osm.pbf\"",
+    "Content-Type": "application/x-pbf",
+    "ETag": "\"258937993\"",
+    "Last-Modified": "Sat, 07 Nov 2026 01:00:00 GMT",
+    "Content-Length": "132516215"
+  }
+}

@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Name=Paper Phone
+Name[ja]=ペーパーフォン
+GenericName=Printable phone booklet
+GenericName[ja]=印刷できる携帯冊子
+Comment=Compose today's information into a printable fold-up booklet
+Comment[ja]=今日の情報を折り畳んで印刷できる冊子にまとめる
+Exec=paperphone
+Icon=org.example.PaperPhone
+# 暫定の表示用。製品のアプリIDはタスク8.3で確定するまで仮。
+Terminal=false
+Categories=Office;Utility;Graphics;
+Keywords=booklet;paper;contact;calendar;map;
+Keywords[ja]=冊子;紙;連絡先;予定;地図;
+X-GNOME-UsesNotifications=false

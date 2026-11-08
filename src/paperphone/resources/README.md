@@ -14,6 +14,12 @@
 - https://github.com/google/fonts/blob/main/ofl/varela/OFL.txt
 - https://github.com/google/fonts/blob/main/ofl/worksans/OFL.txt
 
+## OSMデータと地図デザイン
+
+- 内蔵の47都道府県境界はmovisdaの公開OSM抽出から抜粋したもの。取得元・版・一般化の限界・ODbLの帰属は[境界資源の説明](<maps/README.md>)を参照。
+- 印刷地図はMapLibre互換の[OSM Liberty](https://github.com/maputnik/osm-liberty)から水域・公園・建物・下位道路の配色/幅を参照し、紙の背景とポイント単位へ調整した。エンジンの画素再現ではない。スタイルJSON・タイル・sprite・glyph・アイコン・Robotoを同梱するものではない。
+- デザイン参照元のBSD条件、OpenMapTilesのCC BY 4.0とOSM Bright/Mapbox Open StylesのCC BY 3.0の帰属・変更説明を[地図デザイン通知](<licenses/OSM-Liberty-Style.txt>)に保持する。地図の近くにも参照と印刷向け変更を表示する。OSMデータのODbLとは別の条件として扱う。
+
 ## Python実行時依存
 
 - 予定のiCalendar解析・繰り返し展開には`requirements.txt`の`icalendar`（BSD-2-Clause）と`python-dateutil`（BSD／Apache-2.0デュアルライセンス）を使う。`six`（MIT）は`python-dateutil`の依存として導入される。

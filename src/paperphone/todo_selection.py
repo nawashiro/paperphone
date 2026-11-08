@@ -17,11 +17,12 @@ from .todo import TodoAssessment, TodoBucket, classify_todos
 from .todo_reader import TodoRecord, format_temporal
 
 _ = gettext_for()
-_BUCKET_LABELS = {
-    TodoBucket.TODAY: _("Today"),
-    TodoBucket.UPCOMING: _("Upcoming"),
-    TodoBucket.UNDATED: _("No due date"),
-}
+def _bucket_labels():
+    return {
+        TodoBucket.TODAY: _("Today"),
+        TodoBucket.UPCOMING: _("Upcoming"),
+        TodoBucket.UNDATED: _("No due date"),
+    }
 
 
 class TodoSelectionView(Gtk.Box):
@@ -35,6 +36,7 @@ class TodoSelectionView(Gtk.Box):
         self._assessments: dict[ItemKey, TodoAssessment] = {}
         self._checkboxes: dict[ItemKey, Gtk.CheckButton] = {}
         self._overdue_badges: dict[ItemKey, Gtk.Label] = {}
+        self._detail_labels: dict[ItemKey, Gtk.Label] = {}
         self._keys_by_bucket: dict[TodoBucket, list[ItemKey]] = {
             bucket: [] for bucket in TodoBucket
         }
@@ -52,6 +54,9 @@ class TodoSelectionView(Gtk.Box):
             task_list = Gtk.ListBox()
             task_list.set_selection_mode(Gtk.SelectionMode.NONE)
             task_list.add_css_class("boxed-list")
+            # リストボックスへアクセシブルな名前を付け、空状態も読み上げる。
+            task_list.update_property([Gtk.AccessibleProperty.LABEL],
+                                      [_bucket_labels()[bucket]])
             empty = Gtk.Label(label=_("No tasks in this category."))
             empty.set_xalign(0.0)
             empty.add_css_class("dim-label")
@@ -61,10 +66,24 @@ class TodoSelectionView(Gtk.Box):
             scroller.set_vexpand(True)
             page.append(empty)
             page.append(scroller)
-            self._stack.add_titled(page, bucket.value, _BUCKET_LABELS[bucket])
+            self._stack.add_titled(page, bucket.value, _bucket_labels()[bucket])
             self._lists[bucket] = task_list
             self._empty_labels[bucket] = empty
         self.append(self._stack)
+
+    def retranslate(self):
+        """件名と選択を変更せず、固定見出しと日付テンプレートだけを翻訳する。"""
+        for bucket, title in _bucket_labels().items():
+            child = self._stack.get_child_by_name(bucket.value)
+            self._stack.get_page(child).set_title(title)
+            self._empty_labels[bucket].set_text(_("No tasks in this category."))
+        for key, label in self._detail_labels.items():
+            label.set_text(self._detail_text(self._records[key]))
+        for label in self._overdue_badges.values():
+            label.set_text(_("Overdue"))
+        for key, checkbox in self._checkboxes.items():
+            if not self._records[key].summary:
+                checkbox.set_label(_("Untitled task"))
 
     @property
     def visible_bucket(self) -> TodoBucket:
@@ -108,6 +127,7 @@ class TodoSelectionView(Gtk.Box):
         self._assessments.clear()
         self._checkboxes.clear()
         self._overdue_badges.clear()
+        self._detail_labels.clear()
         self._keys_by_bucket = {bucket: [] for bucket in TodoBucket}
         for task_list in self._lists.values():
             child = task_list.get_first_child()
@@ -163,11 +183,12 @@ class TodoSelectionView(Gtk.Box):
             detail_label.set_wrap(True)
             detail_label.add_css_class("dim-label")
             row_content.append(detail_label)
+            self._detail_labels[todo.key] = detail_label
         if assessment.overdue:
             overdue_label = Gtk.Label(label=_("Overdue"))
             overdue_label.set_xalign(0.0)
+            # 選択判断に関わる状態のため、dim-labelで薄くしない。
             overdue_label.add_css_class("caption")
-            overdue_label.add_css_class("dim-label")
             row_content.append(overdue_label)
             self._overdue_badges[todo.key] = overdue_label
 

@@ -67,6 +67,8 @@ class SourceDescriptor:
     kind: SourceKind
     enabled: bool
     backend_name: str = field(default="", repr=False)
+    parent_uid: str = field(default="", repr=False)
+    connection_status: str = field(default="", repr=False)
 
 
 T = TypeVar("T")
@@ -141,6 +143,17 @@ def parse_managed_sources(
                 enabled = key_file.get_boolean("Data Source", "Enabled")
             else:
                 enabled = True
+            # 親コレクションの資格待ちは「認証待ち」として扱う。CalDAVの
+            # 認証が済まないとタスクリストの読み取りが毎回失敗する。
+            parent = None
+            if "Parent" in keys:
+                try:
+                    parent = key_file.get_string("Data Source", "Parent")
+                except GLib.Error:
+                    parent = None
+            connection_status = _property(properties, "ConnectionStatus")
+            if not isinstance(connection_status, str):
+                connection_status = ""
             extension_keys, _extension_key_count = key_file.get_keys(kind.value)
             backend_name = (
                 key_file.get_string(kind.value, "BackendName")
@@ -158,6 +171,8 @@ def parse_managed_sources(
                 kind=kind,
                 enabled=enabled,
                 backend_name=backend_name,
+                parent_uid=parent or "",
+                connection_status=connection_status,
             )
         )
 

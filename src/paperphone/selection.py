@@ -18,6 +18,25 @@ class ItemKey:
     def __repr__(self) -> str:
         return "ItemKey(<redacted>)"
 
+    def opaque_value(self) -> str:
+        """安定して保存・復元できる文字列表記。
+
+        個人の名前や電話番号を用いるのではなく、EDSのUIDだけを直接
+        区切り文字でつなげる。欄が空でも一意に判別できるよう、
+        値の数そのものを見出しとして載せる。
+        """
+        parts = (self.source_uid, self.object_uid, self.instance_id or "")
+        if any("\x1f" in part for part in parts):
+            raise ValueError("unsupported identifier separator")
+        return "\x1f".join(parts)
+
+    @classmethod
+    def from_opaque_value(cls, value: str):
+        parts = value.split("\x1f")
+        if len(parts) != 3:
+            raise ValueError("opaque key must split into 3 parts")
+        return cls(parts[0], parts[1], parts[2] or None)
+
 
 @dataclass(frozen=True, slots=True, repr=False)
 class SelectableItem:

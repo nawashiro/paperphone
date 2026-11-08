@@ -126,6 +126,10 @@ def next_todo_reassessment(
                 candidates.append(start_epoch)
         if item.due is not None:
             due_epoch = _epoch(item.due, zone, date_due_boundary=isinstance(item.due, DateOnly))
+            # 時刻付きDUEは「厳密に過ぎたら」期限切れ。ちょうど到達した時点で
+            # 次の再評価が翌日まで飛ばないよう、1µs後にも境界を置く。
+            if not isinstance(item.due, DateOnly):
+                due_epoch += 0.000001
             if due_epoch > now_epoch:
                 candidates.append(due_epoch)
 

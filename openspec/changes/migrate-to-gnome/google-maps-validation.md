@@ -26,9 +26,20 @@ Google Maps Platform公式FAQの「Can I create an application that includes Goo
 2. 印刷・PDF出力に適合する別の地図／経路提供方式へ変更する。検索・経路・背景地図・帰属・各提供サービスの利用条件を一体で再検討する。
 3. 地図PDFの要件を変更し、Google連携を画面表示等に限定する。機能縮小になるため、明示的な合意と仕様変更が必要。
 
+## 決定（2026-11-08）
+
+探索と対話の上、方針2「印刷・PDF出力に適合する別の地図／経路提供方式へ変更する」を採用した。方針1・3は不採用。場所検索・徒歩経路・印刷地図はローカルのOSM基盤に置換し、Google MapsのAPI実証（旧タスク2.5）は中断とする。
+
+- 都道府県単位のOSM抽出にはmovisda extracts（`https://osm.download.movisda.io/`）を使う。日本47都道府県がadmin_level=4で日次提供され、`/japan/tokyo-latest.osm.pbf`が`/admin/JP-13-latest.osm.pbf`へ解決されること、`-latest`とETag・Last-Modified、`.poly`・`.geojson`、`index.json`の公開、東京都約132MB（2026-11-07版）を実測で確認した。本ファイルの前掲調査は方針選択のための記録として保持する。
+- 検索・経路・地図描画はアプリ内で完結させる。PostgreSQL・Nominatim・外部ジオコーダ・外部ルーティングWebサービス・WebKitGTKを依存に置かず、pyosmium＋shapely＋rapidfuzzによる一県インデックス、範囲部分グラフ＋Dijkstra/A*、CairoによるMapLibre系公開スタイル参照のベクタ描画とする。
+- 印刷文書へのOSMデータ組込みはODbLの帰属表示を守ることで許容される。Googleの「アプリ生成文書にGoogle由来データを含めない」問題はこの置換で解消する。後続の置換は tasks・design・walking-map delta spec の更新で反映した。
+
 ## 参照
 
 - Google Maps Platform FAQ: https://developers.google.com/maps/faq （上記の文書生成に関する項目）
 - Google Maps Platform Terms of Service: https://cloud.google.com/maps-platform/terms （3.2.3(a) No Scraping、3.2.3(b) No Caching等）
 - Google Maps Platform Service Specific Terms: https://cloud.google.com/maps-platform/terms/maps-service-terms （Places API、Routes API等）
 - 一般の地図利用・印刷ガイド: https://about.google/brand-resource-center/products-and-services/geo-guidelines/
+- movisda OpenStreetMap Data Exports: https://osm.download.movisda.io/
+- ODbL（Open Data Commons Open Database License）: https://opendatacommons.org/licenses/odbl/
+- OSMF Licence（帰属表示の要件）: https://osmfoundation.org/wiki/Licence
