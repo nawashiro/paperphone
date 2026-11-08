@@ -23,9 +23,6 @@ class PlaceSelectionTests(unittest.TestCase):
         Gtk.init()
 
     def make(self, fix=None, submit=None):
-        # 索引キャッシュはモジュール全体で共有するため、各試験は隔離する。
-        from paperphone.place_selection import _INDEX_CACHE
-        _INDEX_CACHE.clear()
         index = PlaceIndex([TOKYO, TOKYO_OTHER, PARK], prefecture=13)
         view = PlaceSelectionView(index, fix=fix, submit=submit or (lambda fn: fn()),
                                   dispatch=lambda fn: fn())
@@ -92,7 +89,8 @@ class PlaceSelectionTests(unittest.TestCase):
         jobs = []
         factory = Mock(return_value=view.index)
         view._submit, view._index_factory = jobs.append, factory
-        view.load_extract(SimpleNamespace(path="synthetic.osm.pbf", prefecture=13))
+        view.load_extract(SimpleNamespace(path="fixture.osm.pbf", prefecture=13,
+                                          sha256="a" * 64))
         factory.assert_not_called()
         view.cancel()
         jobs[0]()
@@ -105,7 +103,8 @@ class PlaceSelectionTests(unittest.TestCase):
         jobs = []
         factory = Mock(return_value=view.index)
         view._submit, view._index_factory = jobs.append, factory
-        view.load_extract(SimpleNamespace(path="synthetic.osm.pbf", prefecture=13))
+        view.load_extract(SimpleNamespace(path="fixture.osm.pbf", prefecture=13,
+                                          sha256="a" * 64))
         self.assertTrue(view.progress.get_visible())
         jobs[0]()
         # ジョブは即実行のsubsetで、索引は完成済み。バーが消えることを確認する。

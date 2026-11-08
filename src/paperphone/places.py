@@ -1,16 +1,9 @@
-"""一県のOSM抽出だけを使う、メモリ内の場所検索。検索語は保存しない。"""
+"""一県の版付き派生データだけを使う、メモリ内の場所検索。検索語は保存しない。"""
 
 from dataclasses import dataclass
-import json
 import math
-import os
-import tempfile
 import unicodedata
 from collections.abc import Callable, Iterable
-from pathlib import Path
-
-
-CACHE_VERSION = 1
 
 
 class PlaceIndexError(Exception):
@@ -60,7 +53,7 @@ _KIND_KEYS = ("place", "amenity", "shop", "tourism", "leisure", "railway",
 
 def _names(tags):
     names = tuple(dict.fromkeys(value.strip() for key in _NAME_KEYS
-                               for value in tags.get(key, "").split(";") if value.strip()))
+                                for value in tags.get(key, "").split(";") if value.strip()))
     return names
 
 
@@ -80,9 +73,9 @@ class PlaceIndex:
     def __init__(self, places: Iterable[Place], *, prefecture: int | None = None):
         if prefecture is not None and (type(prefecture) is not int or not 1 <= prefecture <= 47):
             raise PlaceIndexError()
-        self.prefecture = prefecture
-        self.source_path = None
         try:
+            self.prefecture = prefecture
+            self.source_path = None
             self._places = tuple(place for place in places if _valid(place))
             self._names = tuple(tuple(dict.fromkeys(_normalize(name) for name in
                                       (place.name, *place.aliases) if name.strip()))
@@ -91,151 +84,26 @@ class PlaceIndex:
             raise PlaceIndexError() from None
 
     @classmethod
-    def from_pbf(cls, path, prefecture: int, *, cancelled: Callable[[], bool] | None = None):
-        """PBF/XMLをメモリ内で読む。取消時は部分索引を返さずエラーにする。"""
-        if type(prefecture) is not int or not 1 <= prefecture <= 47:
+    def from_derived(cls, path, sha256: str, prefecture: int, *,
+                     cancelled: Callable[[], bool] | None = None):
+        """版付き派生データから索引を読む。版・県が一致しないものは索引を作らない。"""
+        if (type(prefecture) is not int or not 1 <= prefecture <= 47
+                or not isinstance(sha256, str) or not sha256):
+            raise PlaceIndexError()
+        if cancelled is not None and cancelled():
+            raise PlaceIndexError()
+        from .osm_derived import DerivedStore
+
+        store = DerivedStore.open(path, sha256, prefecture)
+        if store is None:
             raise PlaceIndexError()
         try:
-            class Cancelled(Exception):
-                pass
-
-            def check_cancelled():
-                if cancelled is not None and cancelled():
-                    raise Cancelled()
-
-            check_cancelled()
-            import osmium
-            from shapely import from_wkb
-            from shapely.errors import GEOSException
-
-            geometry_errors = (RuntimeError, ValueError, osmium.InvalidLocationError, GEOSException)
-
-            places = {}
-            factory = osmium.geom.WKBFactory()
-
-            class Handler(osmium.SimpleHandler):
-                def add(self, obj, osm_type, geometry):
-                    names = _names(obj.tags)
-                    if not names or geometry.is_empty or not geometry.is_valid:
-                        return
-                    if geometry.geom_type in ("LineString", "MultiLineString"):
-                        point = geometry.interpolate(0.5, normalized=True)
-                    else:
-                        point = geometry.representative_point()
-                    place = Place(f"{osm_type}/{obj.id}",
-                                  names[0], _kind(obj.tags), point.y, point.x, names[1:])
-                    if _valid(place):
-                        places[place.id] = place
-
-                def node(self, node):
-                    check_cancelled()
-                    if not _names(node.tags):
-                        return
-                    try:
-                        self.add(node, "node", from_wkb(factory.create_point(node)))
-                    except geometry_errors:
-                        pass
-
-                def way(self, way):
-                    check_cancelled()
-                    if not _names(way.tags):
-                        return
-                    # 面はareaコールバックの検証済み幾何からのみ登録する。
-                    if way.is_closed() and _is_area(way.tags):
-                        return
-                    try:
-                        self.add(way, "way", from_wkb(factory.create_linestring(way)))
-                    except geometry_errors:
-                        pass
-
-                def area(self, area):
-                    check_cancelled()
-                    if (not _names(area.tags) or area.tags.get("area") == "no"
-                            or (area.from_way() and not _is_area(area.tags))):
-                        return
-                    try:
-                        geometry = from_wkb(factory.create_multipolygon(area))
-                        # area.idは派生IDなので、元のway/relation IDへ戻す。
-                        osm_type = "way" if area.from_way() else "relation"
-                        names = _names(area.tags)
-                        if geometry.is_empty or not geometry.is_valid:
-                            return
-                        point = geometry.representative_point()
-                        place = Place(f"{osm_type}/{area.orig_id()}", names[0], _kind(area.tags),
-                                      point.y, point.x, names[1:])
-                        if _valid(place):
-                            places[place.id] = place
-                    except geometry_errors:
-                        pass
-
-            # flex_memは座標キャッシュをディスクへ書かない。
-            check_cancelled()
-            Handler().apply_file(os.fspath(path), locations=True, idx="flex_mem")
-            check_cancelled()
-            index = cls(places.values(), prefecture=prefecture)
-            index.source_path = os.path.abspath(os.fspath(path))
-            check_cancelled()
-            return index
-        except Exception:
-            # libosmiumの生エラーにはパスや幾何が含まれる可能性がある。
-            raise PlaceIndexError() from None
-
-    @classmethod
-    def cache_path(cls, prefecture: int, sha256: str, *, directory=None):
-        """版（県・SHA-256）に対応した保存先。索引そのものは含めない。"""
-        if type(prefecture) is not int or not 1 <= prefecture <= 47 or not sha256:
+            index = store.place_index()
+        finally:
+            store.close()
+        if cancelled is not None and cancelled():
             raise PlaceIndexError()
-        root = (Path(directory) if directory is not None else
-                Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "paperphone")
-        return root / "place-index" / f"JP-{prefecture:02d}-{sha256}.json"
-
-    def save_cache(self, path, sha256: str):
-        """索引をキャッシュとして原子的に書き出す。検索語は含めない。"""
-        try:
-            payload = {"version": CACHE_VERSION, "prefecture": self.prefecture,
-                       "sha256": sha256,
-                       "places": [[p.id, p.name, p.kind, p.latitude, p.longitude, list(p.aliases)]
-                                  for p in self._places]}
-            path.parent.mkdir(parents=True, exist_ok=True)
-            fd, temporary = tempfile.mkstemp(dir=str(path.parent), prefix=".cache-")
-            with os.fdopen(fd, "w", encoding="utf-8") as stream:
-                stream.write(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
-            os.chmod(temporary, 0o600)
-            os.replace(temporary, path)
-            prefix = f"JP-{self.prefecture:02d}-"
-            for stale in path.parent.glob(prefix + "*.json"):
-                if stale != path:
-                    try:
-                        stale.unlink()
-                    except OSError:
-                        pass
-        except (OSError, ValueError):
-            # キャッシュの書出しに失敗しても索引自体は既にできている。静かに続ける。
-            try:
-                os.unlink(temporary)
-            except (OSError, UnboundLocalError):
-                pass
-
-    @classmethod
-    def load_cache(cls, path, sha256: str):
-        """版付きのキャッシュを読む。不一致・破損・旧版式はキャッシュなし扱い。"""
-        try:
-            payload = json.loads(Path(path).read_text(encoding="utf-8"))
-            if (payload.get("version") != CACHE_VERSION
-                    or payload.get("sha256") != sha256
-                    or not isinstance(payload.get("places"), list)):
-                raise ValueError
-            prefecture = payload.get("prefecture")
-            places = (Place(str(p[0]), str(p[1]), str(p[2]), float(p[3]), float(p[4]),
-                            [str(a) for a in p[5]]) for p in payload["places"])
-            index = cls(places, prefecture=prefecture)
-            try:
-                index.source_path = str(path)
-            except AttributeError:
-                pass
-            return index
-        except (OSError, ValueError, TypeError, IndexError, json.JSONDecodeError):
-            return None
+        return index
 
     def get(self, place_id: str) -> Place | None:
         """選択候補がこの索引のOSMエンティティか確認する。"""

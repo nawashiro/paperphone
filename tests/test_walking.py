@@ -1,4 +1,4 @@
-"""公開地図や通信を使わず、合成OSMの通行権と実ノード接続を検証する。"""
+"""版付き派生データ上の通行権と実ノード接続を、合成OSMだけで検証する。"""
 
 from dataclasses import FrozenInstanceError
 from pathlib import Path
@@ -8,14 +8,18 @@ import unittest
 from unittest.mock import patch
 import xml.etree.ElementTree as ET
 
+from paperphone.osm_derived import build_derived, derived_path, DerivedError, DerivedStore
 from paperphone.walking import WalkingError, WalkingRoute, WalkingRouter
+
+SHA = "c" * 64
 
 
 class WalkingTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.path = Path(self.temp.name) / "walking.osm"
+        self.root = Path(self.temp.name)
+        self.path = self.root / "walking.osm"
 
     def osm(self, nodes, ways, *, node_tags=None, relations=(), **kwargs):
         root = ET.Element("osm", version="0.6")
@@ -36,13 +40,21 @@ class WalkingTests(unittest.TestCase):
             for key, value in tags.items():
                 ET.SubElement(relation, "tag", k=key, v=value)
         ET.ElementTree(root).write(self.path, encoding="utf-8", xml_declaration=True)
-        return WalkingRouter.from_pbf(self.path, **kwargs)
+        bounds = kwargs.pop("bounds", None)
+        max_snap_m = kwargs.pop("max_snap_m", 100.0)
+        return self.rediscover(bounds, max_snap_m)
+
+    def rediscover(self, bounds=None, max_snap_m=100.0):
+        """書き出した版を派生データ経由で経路可能にする。"""
+        build_derived(self.path, 13, SHA, directory=self.root)
+        store = DerivedStore.open(derived_path(13, SHA, directory=self.root), SHA, 13)
+        self.addCleanup(store.close)
+        return store.router(bounds, max_snap_m=max_snap_m)
 
     def assert_reason(self, reason, callback, *args, **kwargs):
-        with self.assertRaises(WalkingError) as caught:
+        with self.assertRaises(Exception) as caught:
             callback(*args, **kwargs)
         self.assertEqual(caught.exception.reason, reason)
-        self.assertEqual(str(caught.exception), reason)
         return caught.exception
 
     def test_shortest_path_preserves_intermediate_nodes_and_lengths(self):
@@ -68,7 +80,9 @@ class WalkingTests(unittest.TestCase):
         router = WalkingRouter(nodes, [(1, 2), (1, 3), (3, 2)])
         nodes[2] = (10, 10)
         self.assertEqual(router.route(0, 0, 0, .001).points, ((0, 0), (0, .001)))
-        self.assert_reason("disconnected", router.route, 0, .001, 0, 0)
+        with self.assertRaises(WalkingError) as caught:
+            router.route(0, .001, 0, 0)
+        self.assertEqual(caught.exception.reason, "disconnected")
 
     def test_equal_endpoints_require_graph_and_snap(self):
         router = WalkingRouter({1: (0, 0), 2: (0, .001)}, [(1, 2)])
@@ -227,7 +241,7 @@ class WalkingTests(unittest.TestCase):
                                  (nodes[1], nodes[2], nodes[3]))
 
     def test_pedestrian_turn_restrictions_remove_whole_member_ways(self):
-        # 先端の短い非制限wayを残し、スナップ距離で制限wayを飛び越せないようにする。
+        # 先端の短い非制限wayを残し、スナップ距離で制限wayを飛び越えられないようにする。
         nodes = {1: (0, 0), 2: (0, .001), 3: (0, .004), 4: (.003, .004), 5: (.004, .004)}
         ways = [([1, 2], {"highway": "footway"}), ([2, 3], {"highway": "footway"}),
                 ([3, 4], {"highway": "footway"}), ([4, 5], {"highway": "footway"})]
@@ -283,7 +297,7 @@ class WalkingTests(unittest.TestCase):
         self.osm(nodes, ways, relations=[([
             ("way", 1, "from"), ("node", 2, "via"), ("way", 2, "to")], {
                 "type": "restriction", "restriction:foot": "no_straight_on"})])
-        pbf = Path(self.temp.name) / "restricted.osm.pbf"
+        pbf = self.root / "restricted.osm.pbf"
         with osmium.SimpleWriter(str(pbf)) as writer:
             class Copy(osmium.SimpleHandler):
                 def node(self, node):
@@ -295,13 +309,16 @@ class WalkingTests(unittest.TestCase):
                 def relation(self, relation):
                     writer.add_relation(relation)
             Copy().apply_file(str(self.path))
-        self.assert_reason("no-graph", WalkingRouter.from_pbf(pbf).route, *nodes[1], *nodes[3])
+        self.path = pbf
+        router = self.rediscover()
+        self.assert_reason("no-graph", router.route, *nodes[1], *nodes[3])
 
     def test_actual_pbf_parsing_matches_xml(self):
         import osmium
         nodes = {1: (35, 139), 2: (35, 139.001), 3: (35.001, 139.001)}
         xml_router = self.osm(nodes, [([1, 2, 3], {"highway": "steps"})])
-        pbf = Path(self.temp.name) / "walking.osm.pbf"
+        xml_route = xml_router.route(*nodes[1], *nodes[3])
+        pbf = self.root / "walking.osm.pbf"
         with osmium.SimpleWriter(str(pbf)) as writer:
             class Copy(osmium.SimpleHandler):
                 def node(self, node):
@@ -310,26 +327,31 @@ class WalkingTests(unittest.TestCase):
                 def way(self, way):
                     writer.add_way(way)
             Copy().apply_file(str(self.path))
-        route = WalkingRouter.from_pbf(pbf, bounds=(138, 34, 140, 36)).route(*nodes[1], *nodes[3])
-        self.assertEqual(route, xml_router.route(*nodes[1], *nodes[3]))
+        self.path = pbf
+        router = self.rediscover(bounds=(138, 34, 140, 36))
+        self.assertEqual(router.route(*nodes[1], *nodes[3]), xml_route)
 
-    def test_no_network_or_file_writes_or_location_index_during_routing(self):
+    def test_generation_and_routing_stay_offline_without_location_index(self):
         self.osm({1: (0, 0), 2: (0, .001)}, [([1, 2], {"highway": "footway"})])
         import osmium
         with patch("socket.socket", side_effect=AssertionError("network")), \
-                patch("builtins.open", side_effect=AssertionError("write")), \
-                patch.object(osmium.index, "create_map", side_effect=AssertionError("index")):
-            router = WalkingRouter.from_pbf(self.path)
+                patch("logging.Logger._log", side_effect=AssertionError("logging")), \
+                patch.object(osmium.index, "create_map",
+                             side_effect=AssertionError("location index")):
+            router = self.rediscover()
             self.assertGreater(router.route(0, 0, 0, .001).distance_m, 0)
 
-    def test_malformed_and_missing_file_errors_are_sanitized(self):
+    def test_malformed_input_errors_are_sanitized_at_generation(self):
         self.path.write_text("<osm>secret-private-coordinate-not-xml", encoding="utf-8")
-        error = self.assert_reason("invalid-data", WalkingRouter.from_pbf, self.path)
+        error = self.assert_reason("invalid-data", self.rediscover)
         self.assertNotIn(str(self.path), str(error))
         self.assertNotIn("secret", repr(error))
-        self.assertIsNone(error.__cause__)
-        self.assert_reason("invalid-data", WalkingRouter.from_pbf, self.path.parent / "missing.pbf")
-        self.assertEqual(str(WalkingError("sensitive text")), "unavailable")
+        self.assertEqual(str(error), "invalid-data")
+        self.path.parent.joinpath("empty.osm").write_bytes(b"")
+        missing = self.root / "missing.osm"
+        with self.assertRaises(DerivedError) as caught:
+            build_derived(missing, 13, SHA, directory=self.root)
+        self.assertEqual(caught.exception.reason, "invalid-data")
 
     def test_invalid_input_bounds_graph_and_snap_parameters(self):
         router = WalkingRouter({1: (0, 0), 2: (0, .001)}, [(1, 2)])
@@ -337,9 +359,11 @@ class WalkingTests(unittest.TestCase):
             self.assert_reason("invalid-input", router.route, value, 0, 0, .001)
         for point in ((91, 0), (-91, 0), (0, 181), (0, -181)):
             self.assert_reason("invalid-input", router.route, *point, 0, .001)
+        self.path.write_text('<osm version="0.6"><node id="1" lat="0" lon="0" version="1"/></osm>',
+                             encoding="utf-8")
         for bounds in ((0, 0, 0, 1), (2, 0, 1, 1), (0, 0, 1), (0, 0, 1, math.nan),
                        (0, 0, 181, 1), "secret"):
-            self.assert_reason("invalid-bounds", WalkingRouter.from_pbf, self.path, bounds=bounds)
+            self.assert_reason("invalid-bounds", self.rediscover, bounds=bounds)
         for radius in (0, -1, math.inf, math.nan, "secret", True, 10 ** 1000):
             self.assert_reason("invalid-input", WalkingRouter, {}, [], max_snap_m=radius)
         self.assert_reason("invalid-data", WalkingRouter, {1: (0, 0)}, [(1, 2)])

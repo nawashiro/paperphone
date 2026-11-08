@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from dataclasses import dataclass
 import math
-import os
+from pathlib import Path
 
 import cairo
 import gi
@@ -55,6 +55,8 @@ gi.require_version("PangoCairo", "1.0")
 from gi.repository import Pango, PangoCairo
 
 from .i18n import gettext_for
+from .osm_derived import DerivedStore
+from .walking import WalkingError
 from .walking_sheet import OSM_ATTRIBUTION, OSM_ATTRIBUTION_SHORT, WalkingSheet
 
 
@@ -115,110 +117,24 @@ def _area_kind(tags):
     return None
 
 
-_FEATURE_CACHE = {}
-_FEATURE_CACHE_LIMIT = 8
+def _read_features(sheet, bounds):
+    """版付き派生データから、表示範囲と重なる地物を取り出す。
 
-
-def _feature_cache_key(path, bounds):
-    try:
-        return (str(path), tuple(float(v) for v in bounds))
-    except (TypeError, ValueError):
-        return (str(path),)
-
-
-def _read_features(path, bounds):
-    """同じ版・同じ範囲の地図表示データをメモリで再利用する。
-
-    PBF/XMLは範囲で狭めて走査する。把up everything from 範囲内の構成が
-    変わった時だけ走査し直す。保存はメモリ内だけ。
+    戻り値は（area特集、road特集、label特集）。幾何は投影座標で、
+    areaは穴を含むリング列、roadは折れ線、labelは（地名, x, y）。
+    版か読出しに失敗すれば、描画側はsource-unavailableを示す。
     """
-    key = _feature_cache_key(path, bounds)
-    if key in _FEATURE_CACHE:
-        return _FEATURE_CACHE[key]
-    result = _read_features_uncached(path, bounds)
-    while len(_FEATURE_CACHE) >= _FEATURE_CACHE_LIMIT:
-        _FEATURE_CACHE.pop(next(iter(_FEATURE_CACHE)))
-    _FEATURE_CACHE[key] = result
-    return result
-
-
-def _read_features_uncached(path, bounds):
-    """同じ不変抽出を走査し、表示範囲と交差する幾何だけ保持する。"""
-    import osmium
-    from shapely import wkb
-    from shapely.geometry import box
-    from shapely.ops import transform
-
-    viewport = box(*bounds)
-    # 県全体の幾何を毎回投影せず、まず経緯度bboxで候補を絞る。
-    geographic_bounds = (
-        math.degrees(bounds[0] / 6378137),
-        math.degrees(math.atan(math.sinh(bounds[1] / 6378137))),
-        math.degrees(bounds[2] / 6378137),
-        math.degrees(math.atan(math.sinh(bounds[3] / 6378137))),
-    )
-    factory = osmium.geom.WKBFactory()
-    areas, roads, labels = [], [], []
-
-    def projected(geometry):
-        return transform(lambda lon, lat, z=None: project(lat, lon), geometry)
-
-    def retain(raw):
-        geometry = wkb.loads(raw, hex=True)
-        if geometry.is_empty:
-            return None
-        west, south, east, north = geometry.bounds
-        if (east < geographic_bounds[0] or west > geographic_bounds[2]
-                or north < geographic_bounds[1] or south > geographic_bounds[3]):
-            return None
-        geometry = projected(geometry)
-        if not geometry.is_valid or not geometry.intersects(viewport):
-            return None
-        return geometry
-
-    def label(tags, geometry):
-        name = tags.get("name") or tags.get("name:ja") or tags.get("name:en")
-        if name:
-            point = geometry.intersection(viewport).representative_point()
-            labels.append((name, point.x, point.y))
-
-    class Handler(osmium.SimpleHandler):
-        def node(self, node):
-            if not node.location.valid():
-                return
-            name = node.tags.get("name") or node.tags.get("name:ja") or node.tags.get("name:en")
-            if name and any(node.tags.get(key) for key in ("place", "amenity", "tourism", "railway")):
-                px, py = project(node.location.lat, node.location.lon)
-                if bounds[0] <= px <= bounds[2] and bounds[1] <= py <= bounds[3]:
-                    labels.append((name, px, py))
-
-        def way(self, way):
-            highway = way.tags.get("highway", "")
-            road_class = highway.removesuffix("_link")
-            if road_class not in ROAD_STYLES:
-                return
-            try:
-                geometry = retain(factory.create_linestring(way))
-            except (RuntimeError, ValueError):
-                return  # 抽出境界の不完全wayを架空の線で補完しない。
-            if geometry is not None:
-                roads.append((road_class, geometry))
-                label(way.tags, geometry)
-
-        def area(self, area):
-            kind = _area_kind(area.tags)
-            if kind is None:
-                return
-            try:
-                geometry = retain(factory.create_multipolygon(area))
-            except (RuntimeError, ValueError):
-                return
-            if geometry is not None:
-                areas.append((kind, geometry))
-                label(area.tags, geometry)
-
-    Handler().apply_file(os.fspath(path), locations=True, idx="flex_mem")
-    return areas, roads, labels
+    try:
+        store = DerivedStore.open(Path(sheet.source_path), sheet.source_sha256,
+                                  sheet.prefecture)
+    except (OSError, ValueError, TypeError):
+        raise WalkingError("unavailable") from None
+    if store is None:
+        raise WalkingError("unavailable")
+    try:
+        return store.map_features(bounds)
+    finally:
+        store.close()
 
 
 def _to_gray(color):
@@ -252,18 +168,12 @@ def _size(layout):
     return logical.width / Pango.SCALE, logical.height / Pango.SCALE
 
 
-def _path(context, geometry, screen):
-    if geometry.geom_type == "Polygon":
-        for ring in (geometry.exterior, *geometry.interiors):
-            for i, coordinate in enumerate(ring.coords):
-                (context.move_to if i == 0 else context.line_to)(*screen(*coordinate[:2]))
-            context.close_path()
-    elif geometry.geom_type in ("LineString", "LinearRing"):
-        for i, coordinate in enumerate(geometry.coords):
-            (context.move_to if i == 0 else context.line_to)(*screen(*coordinate[:2]))
-    else:
-        for part in geometry.geoms:
-            _path(context, part, screen)
+def _path(context, paths, screen):
+    """リング列または折れ線（投影座標）を現在のパスに足す。穴は偶奇フィルで保つ。
+    """
+    for path in paths:
+        for i, point in enumerate(path):
+            (context.move_to if i == 0 else context.line_to)(*screen(*point))
 
 
 def _route_path(context, coordinates, screen):
@@ -321,7 +231,7 @@ def draw_walking_map(context, sheet: WalkingSheet, *, x, y, width, height) -> Ma
                   cx + width / scale / 2, cy + map_height / scale / 2)
         screen = lambda px, py: (x + (px - bounds[0]) * scale, y + (bounds[3] - py) * scale)
         try:
-            areas, roads, labels = _read_features(sheet.source_path, bounds)
+            areas, roads, labels = _read_features(sheet, bounds)
         except Exception:
             return MapRenderResult(projected_bounds=bounds, error="source-unavailable")
 

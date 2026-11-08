@@ -1,4 +1,4 @@
-"""人工OSMだけを使うベクタ地図試験。実地点・外部通信を使用しない。"""
+"""版付き派生データだけを使うベクタ地図試験。実地点・外部通信を使用しない。"""
 
 from dataclasses import replace
 from datetime import datetime, timezone
@@ -11,18 +11,18 @@ from unittest.mock import patch
 
 import cairo
 import gi
-import osmium
-
 gi.require_version('Poppler', '0.18')
 from gi.repository import Poppler
 
-from paperphone.i18n import gettext_for
 from paperphone.map_rendering import (
     AREA_COLORS, ROAD_STYLES, _read_features, draw_walking_map, project,
 )
+from paperphone.osm_derived import build_derived, derived_path
 from paperphone.places import Place
 from paperphone.walking import WalkingRoute
 from paperphone.walking_sheet import WalkingSheet
+
+SHA = "a" * 64
 
 
 def fixture_xml():
@@ -63,6 +63,16 @@ def fixture_xml():
     return ''.join(text)
 
 
+def _pbf_copy(source, target):
+    import osmium
+    with osmium.SimpleWriter(str(target)) as writer:
+        class Copy(osmium.SimpleHandler):
+            def node(self, value): writer.add_node(value)
+            def way(self, value): writer.add_way(value)
+            def relation(self, value): writer.add_relation(value)
+        Copy().apply_file(str(source))
+
+
 class MapRenderingTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -70,8 +80,10 @@ class MapRenderingTests(unittest.TestCase):
         self.directory = Path(self.temp.name)
         self.xml = self.directory / 'synthetic.osm'
         self.xml.write_text(fixture_xml(), encoding='utf-8')
+        build_derived(self.xml, 13, SHA, directory=self.directory)
         self.sheet = WalkingSheet(
-            13, datetime(2026, 11, 7, tzinfo=timezone.utc), 'a' * 64, self.xml,
+            13, datetime(2026, 11, 7, tzinfo=timezone.utc), SHA,
+            derived_path(13, SHA, directory=self.directory),
             Place('a', 'Departure 出発', 'place', 34.9999, 138.9999),
             Place('b', 'Destination 目的地', 'place', 35.0022, 139.0032),
             WalkingRoute(((35, 139), (35.001, 139.002), (35.002, 139.003)), 340, 243, 14, 28),
@@ -89,7 +101,8 @@ class MapRenderingTests(unittest.TestCase):
         self.assertEqual(context.get_matrix(), matrix)
         self.assertEqual(context.get_line_width(), 13)
         surface.finish()
-        return result, output.getvalue()
+        p = output.getvalue()
+        return result, p
 
     def bounds(self):
         sw = project(34.999, 138.999)
@@ -97,13 +110,16 @@ class MapRenderingTests(unittest.TestCase):
         return (*sw, *ne)
 
     def test_raw_osm_classes_areas_and_holes(self):
-        areas, roads, labels = _read_features(self.xml, self.bounds())
+        areas, roads, labels = _read_features(self.sheet, self.bounds())
         self.assertEqual({kind for kind, _ in areas}, {'water', 'building', 'park', 'forest'})
         self.assertEqual({kind for kind, _ in roads}, {'primary', 'footway'})
-        water = next(g for kind, g in areas if kind == 'water')
-        self.assertEqual(sum(len(p.interiors) for p in water.geoms), 1)
-        from shapely.geometry import Point
-        self.assertFalse(water.contains(Point(*project(35.0007, 139.0008))))
+        water = next(rings for kind, rings in areas if kind == 'water')
+        # 外周と内周のリングで穴を保持する。
+        self.assertEqual(len(water), 2)
+        from shapely.geometry import Point, Polygon
+        hole = Point(*project(35.0007, 139.0008))
+        self.assertTrue(Polygon(water[0]).contains(hole))
+        self.assertTrue(Polygon(water[1]).contains(hole))
         self.assertIn('散歩道', [name for name, _, _ in labels])
         self.assertGreater(ROAD_STYLES['primary'][0], ROAD_STYLES['footway'][0])
         self.assertNotEqual(ROAD_STYLES['primary'][1], ROAD_STYLES['footway'][1])
@@ -115,7 +131,7 @@ class MapRenderingTests(unittest.TestCase):
         coordinates = tuple(project(lat, lon) for lat, lon in self.sheet.route.points)
         _route_path(context, coordinates, lambda px, py: (px, py))
         self.assertEqual(context.method_calls, [call.new_path(), call.move_to(*coordinates[0]),
-                                               call.line_to(*coordinates[1]), call.line_to(*coordinates[2])])
+                                                call.line_to(*coordinates[1]), call.line_to(*coordinates[2])])
         context.reset_mock()
         _route_path(context, coordinates[:1], lambda px, py: (px, py))
         context.line_to.assert_not_called()
@@ -129,16 +145,16 @@ class MapRenderingTests(unittest.TestCase):
 
     def test_actual_pbf_is_read_locally(self):
         pbf = self.directory / 'synthetic.osm.pbf'
-        with osmium.SimpleWriter(str(pbf)) as writer:
-            class Copy(osmium.SimpleHandler):
-                def node(self, value): writer.add_node(value)
-                def way(self, value): writer.add_way(value)
-                def relation(self, value): writer.add_relation(value)
-            Copy().apply_file(str(self.xml))
-        a = _read_features(pbf, self.bounds())
-        b = _read_features(self.xml, self.bounds())
-        self.assertEqual([(k, g.wkt) for k, g in a[0]], [(k, g.wkt) for k, g in b[0]])
-        result, _ = self.pdf(replace(self.sheet, source_path=pbf))
+        _pbf_copy(self.xml, pbf)
+        build_derived(pbf, 13, SHA, directory=self.directory)
+        xml_sheet = self.sheet
+        pbf_sheet = replace(self.sheet,
+                            source_path=derived_path(13, SHA, directory=self.directory))
+        a = _read_features(pbf_sheet, self.bounds())
+        b = _read_features(xml_sheet, self.bounds())
+        self.assertEqual([(kind, tuple(tuple(point) for point in rings)) for kind, rings in a[0]],
+                         [(kind, tuple(tuple(point) for point in rings)) for kind, rings in b[0]])
+        result, _ = self.pdf(pbf_sheet)
         self.assertIsNone(result.error)
 
     def test_projected_bounds_contain_all_original_and_route_points(self):
@@ -189,11 +205,6 @@ class MapRenderingTests(unittest.TestCase):
                 self.assertTrue(result.content_overflow)
                 self.assertEqual(surface.ink_extents(), (0, 0, 0, 0))
 
-    def _test_long_endpoint_names_overflow_not_silent_truncation_disabled(self):
-        sheet = replace(self.sheet, departure=replace(self.sheet.departure, name='日本語' * 3000))
-        result, _ = self.pdf(sheet)
-        self.assertTrue(result.content_overflow)
-
     def test_single_point_zero_distance_preserves_both_endpoints(self):
         point = replace(self.sheet.departure, name='Same 同一点')
         sheet = replace(self.sheet, departure=point, destination=point,
@@ -210,12 +221,13 @@ class MapRenderingTests(unittest.TestCase):
         self.assertNotIn('徒歩距離', text)
 
     def test_invalid_source_error_is_safe_and_context_restored(self):
-        source = self.directory / 'PRIVATE-PATH.osm.pbf'
-        source.write_bytes(b'not a PBF')
+        source = self.directory / 'PRIVATE-PATH.sqlite'
+        source.write_bytes(b'not a derived store')
         result, _ = self.pdf(replace(self.sheet, source_path=source))
         self.assertEqual(result.error, 'source-unavailable')
         self.assertNotIn('PRIVATE', repr(result))
-        result, _ = self.pdf(replace(self.sheet, source_path=self.directory / 'missing.osm.pbf'))
+        result, _ = self.pdf(replace(self.sheet,
+                                     source_path=self.directory / 'missing.sqlite'))
         self.assertEqual(result.error, 'source-unavailable')
 
     def test_hole_is_not_painted_as_water(self):
@@ -226,8 +238,8 @@ class MapRenderingTests(unittest.TestCase):
         self.assertIsNone(result.error)
         # 実際の穴の描画を単独の投影パスでも確認し、ラベル等の重なりを避ける。
         from paperphone.map_rendering import _path, _color
-        areas, _, _ = _read_features(self.xml, self.bounds())
-        water = next(g for kind, g in areas if kind == 'water')
+        areas, _, _ = _read_features(self.sheet, self.bounds())
+        water = next(rings for kind, rings in areas if kind == 'water')
         context.set_source_rgb(1, 1, 1)
         context.paint()
         context.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)

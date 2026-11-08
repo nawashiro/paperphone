@@ -84,3 +84,7 @@ msgstr ""
 #: src/paperphone/resources.py:49
 msgid "Typography"
 msgstr ""
+
+#: src/paperphone/osm_region_view.py:33
+msgid "Map data could not be prepared."
+msgstr ""

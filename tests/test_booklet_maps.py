@@ -14,6 +14,7 @@ gi.require_version("Poppler", "0.18")
 from gi.repository import Gio, GLib, Poppler
 
 from paperphone.booklet_layout import render_booklet
+from paperphone.osm_derived import build_derived, derived_path
 from paperphone.booklet_maps import MAP_RECT, MapPageError, map_page_painter, render_with_map
 from paperphone.map_rendering import MapRenderResult
 from paperphone.places import Place
@@ -43,8 +44,9 @@ class BookletMapTests(unittest.TestCase):
         self.addCleanup(directory.cleanup)
         self.source = Path(directory.name) / "synthetic.osm"
         self.source.write_text(fixture_xml(), encoding="utf-8")
+        build_derived(self.source, 13, "a" * 64, directory=self.source.parent)
         self.sheet = WalkingSheet(13, datetime(2026, 11, 7, tzinfo=timezone.utc),
-            "a" * 64, self.source,
+            "a" * 64, derived_path(13, "a" * 64, directory=self.source.parent),
             Place("a", "出発地点", "place", 35, 139),
             Place("b", "目的地点", "place", 35.002, 139.003),
             WalkingRoute(((35, 139), (35.001, 139.002), (35.002, 139.003)), 340, 243, 0, 0),

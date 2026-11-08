@@ -1,6 +1,6 @@
-"""ローカルOSMの実ノードだけを使う徒歩経路。通信・ログ・永続化は行わない。
+"""実ノードだけを結ぶ徒歩経路。通信・ログ・永続化は行わない。
 
-範囲内のノードと、その両端が範囲内にあるway区間だけを保持する。
+ノードと有向区間は引数として渡され、距離は実座標から計算する。
 幾何学的交差や切断されたwayの欠落部分を接続しない。スナップ先は
 実在する通行可能なOSMノード（既定100m以内）であり、道路上への投影や
 出発地点への架空の接続線は生成しない。長い区間の中間では、近いノードが
@@ -142,7 +142,7 @@ def _way_directions(tags):
 
 
 class WalkingRouter:
-    """メモリ内グラフ。通常はfrom_pbf、合成試験ではノードと有向辺を渡す。
+    """メモリ内グラフ。版から切り出したノードと有向区間を受け取る。
 
     nodes: {OSM node ID: (latitude, longitude)}
     edges: (from ID, to ID)の有向区間。距離は実座標から計算する。
@@ -173,25 +173,6 @@ class WalkingRouter:
             self._graph = graph
         except (TypeError, ValueError, WalkingError, AttributeError):
             raise WalkingError("invalid-data") from None
-
-    @classmethod
-    def from_pbf(cls, path, *, bounds=None, max_snap_m=100.0):
-        """pyosmiumでPBF/XMLを2回走査。位置索引や一時ファイルは作らない。
-
-        1回目は範囲内座標・障害物・歩行者ターン制限relation、
-        2回目は制限を除いた徒歩wayの実ノード間区間を読む。
-        参照先の欠落・範囲外・通行不能ノードを飛び越えて接続しない。
-        """
-        router = cls({}, (), bounds=bounds, max_snap_m=max_snap_m)
-        try:
-            nodes, edges = _scan_pedestrian(
-                path, inside=lambda point: _inside(point, router.bounds))
-            return cls(nodes, edges, bounds=router.bounds, max_snap_m=max_snap_m)
-        except ImportError:
-            raise WalkingError("unavailable") from None
-        except Exception:
-            raise WalkingError("invalid-data") from None
-
 
     def _snap(self, point):
         distance, node = min((_distance(point, coordinate), node)
@@ -236,16 +217,17 @@ class _Cancelled(Exception):
     """走査の打ち切り。"""
 
 
-def _scan_pedestrian(path, *, inside, cancelled=None):
-    """PBF/XMLを徒歩グラフ用に2回走査する共有手順。
+def _scan_pedestrian(path, *, cancelled=None):
+    """PBF/XMLを2回走査し、徒歩グラフの構成部品を全部取り出す共有手順。
 
-    insideは通す座標（緯度経度タプル）を判定する呼出し可能オブジェクト。
-    bounds=None相当（県全域の永続グラフ）でも同じ規則で使える。
-    戻り値は（{ノードID: (lat, lon)}, [(from_id, to_id)]）。
+    位置索引や一時ファイルは作らない。戻り値は
+    （{ノードID: (lat, lon)}、(way_id, forward, backward, (node_id, ...))のリスト）。
+    参照先の欠落・通行不能ノードを飛び越えて接続しない。
     """
     try:
         import osmium
         nodes = {}
+        way_rows = []
         restricted_ways = set()
         restriction_nodes = set()
 
@@ -259,7 +241,7 @@ def _scan_pedestrian(path, *, inside, cancelled=None):
                 if node.deleted or not node.location.valid():
                     return
                 point = (node.location.lat, node.location.lon)
-                if inside(point) and _node_passable(node.tags):
+                if _node_passable(node.tags):
                     nodes[node.id] = point
 
             def relation(self, relation):
@@ -291,7 +273,6 @@ def _scan_pedestrian(path, *, inside, cancelled=None):
                 restricted_ways.update(member.ref for member in members if member.type == "w")
                 restriction_nodes.update(member.ref for member in via_members if member.type == "n")
 
-        edges = []
         found_restricted_ways = set()
         found_restriction_nodes = set()
 
@@ -313,21 +294,15 @@ def _scan_pedestrian(path, *, inside, cancelled=None):
                 forward, backward = _way_directions(way.tags)
                 if not (forward or backward):
                     return
-                refs = [node.ref for node in way.nodes]
-                for source, target in zip(refs, refs[1:]):
-                    if source not in nodes or target not in nodes:
-                        continue
-                    if forward:
-                        edges.append((source, target))
-                    if backward:
-                        edges.append((target, source))
+                refs = tuple(node.ref for node in way.nodes)
+                way_rows.append((way.id, forward, backward, refs))
 
         Nodes().apply_file(os.fspath(path))
         Ways().apply_file(os.fspath(path))
         if (found_restricted_ways != restricted_ways
                 or found_restriction_nodes != restriction_nodes):
             raise ValueError()
-        return nodes, edges
+        return nodes, way_rows
     except _Cancelled:
         raise WalkingError("unavailable") from None
     except ImportError:

@@ -121,15 +121,15 @@ class ExtractStore:
                 data_path = self.directory / file_name
                 if data_path.is_file() and not data_path.is_symlink():
                     data_path.unlink()
-                # 徒歩グラフの版キャッシュも同じ県・同じ版に属する。
-                walk_path = self.directory / f"JP-{prefecture:02d}-{data['sha256']}.walk.npz"
-                if walk_path.is_file() and not walk_path.is_symlink():
-                    walk_path.unlink()
+                # 場所検索・徒歩経路・印刷地物の派生データも同じ県・同じ版に属する。
+                derived_path = self.directory / f"JP-{prefecture:02d}-{data['sha256']}.sqlite"
+                if derived_path.is_file() and not derived_path.is_symlink():
+                    derived_path.unlink()
             else:
                 for stored in self.directory.glob(f"JP-{prefecture:02d}-*.osm.pbf"):
                     if stored.is_file() and not stored.is_symlink():
                         stored.unlink()
-                for stale in self.directory.glob(f"JP-{prefecture:02d}-*.walk.npz"):
+                for stale in self.directory.glob(f"JP-{prefecture:02d}-*.sqlite"):
                     if stale.is_file() and not stale.is_symlink():
                         stale.unlink()
             if manifest.is_file():
@@ -151,6 +151,9 @@ class ExtractStore:
             for stored in sorted(self.directory.glob("JP-*-*.osm.pbf")):
                 if stored.is_file() and not stored.is_symlink():
                     stored.unlink()
+            for stale in sorted(self.directory.glob("JP-*-*.sqlite")):
+                if stale.is_file() and not stale.is_symlink():
+                    stale.unlink()
         except OSError:
             raise ExtractFailure("storage") from None
 

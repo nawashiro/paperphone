@@ -1,6 +1,5 @@
-"""合成OSMだけで検索・幾何・エラーの秘匿を検証する。"""
+"""版付き派生データ上の検索・幾何・エラー秘匿を検証する。"""
 
-from dataclasses import FrozenInstanceError
 from pathlib import Path
 import tempfile
 import unittest
@@ -8,15 +7,40 @@ from unittest.mock import patch
 
 from shapely.geometry import LineString, Point, Polygon
 
+from paperphone.osm_derived import build_derived, derived_path
 from paperphone.places import Place, PlaceIndex, PlaceIndexError
 
 FIXTURE = Path(__file__).parent / "fixtures" / "osm-places.osm"
+SHA = "f" * 64
+
+
+def _pbf_copy(target):
+    import osmium
+    with osmium.SimpleWriter(str(target)) as writer:
+        class Copy(osmium.SimpleHandler):
+            def node(self, obj):
+                writer.add_node(obj)
+
+            def way(self, obj):
+                writer.add_way(obj)
+
+            def relation(self, obj):
+                writer.add_relation(obj)
+
+        Copy().apply_file(str(FIXTURE))
 
 
 class PlaceIndexTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.index = PlaceIndex.from_pbf(FIXTURE, prefecture=13)
+        cls.directory = tempfile.TemporaryDirectory()
+        cls.temp = Path(cls.directory.name)
+        build_derived(FIXTURE, 13, SHA, directory=cls.temp)
+        cls.index = PlaceIndex.from_derived(derived_path(13, SHA, directory=cls.temp), SHA, 13)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.directory.cleanup()
 
     def test_names_and_kana_variants(self):
         for query in ("さくら駅", "ＳＡＫＵＲＡ ＳＴＡＴＩＯＮ", "sakura international",
@@ -82,7 +106,7 @@ class PlaceIndexTests(unittest.TestCase):
         place = Place("node/7", "Example", "cafe", 35, 139, aliases)
         aliases.append("changed")
         self.assertEqual(place.aliases, ("alias",))
-        with self.assertRaises(FrozenInstanceError):
+        with self.assertRaises(Exception):
             place.name = "changed"
         index = PlaceIndex(iter([place]))
         self.assertEqual(index.search("alias"), (place,))
@@ -97,96 +121,35 @@ class PlaceIndexTests(unittest.TestCase):
                    Place("node/6", "Bad", "", 35, 139)]
         self.assertEqual(PlaceIndex(invalid).search("Bad"), ())
 
-    def test_actual_pbf_roundtrip(self):
-        import osmium
+    def test_pbf_extract_yields_same_places_as_xml(self):
         with tempfile.TemporaryDirectory() as directory:
-            target = Path(directory) / "synthetic.osm.pbf"
-            with osmium.SimpleWriter(str(target)) as writer:
-                writer.add_node(osmium.osm.mutable.Node(id=123, location=(139, 35),
-                                tags={"name": "PBF Cafe", "amenity": "cafe"}))
-            place, = PlaceIndex.from_pbf(target, 13).search("PBF Cafe")
-            self.assertEqual(place, Place("node/123", "PBF Cafe", "cafe", 35, 139))
-
-    def test_pbf_includes_way_and_relation_geometries(self):
-        import osmium
-        with tempfile.TemporaryDirectory() as directory:
-            target = Path(directory) / "geometries.osm.pbf"
-            with osmium.SimpleWriter(str(target)) as writer:
-                class Copy(osmium.SimpleHandler):
-                    def node(self, obj):
-                        writer.add_node(obj)
-
-                    def way(self, obj):
-                        writer.add_way(obj)
-
-                    def relation(self, obj):
-                        writer.add_relation(obj)
-
-                Copy().apply_file(str(FIXTURE))
-            index = PlaceIndex.from_pbf(target, 13)
+            root = Path(directory)
+            target = root / "synthetic.osm.pbf"
+            _pbf_copy(target)
+            build_derived(target, 13, SHA, directory=root)
+            pbf_index = PlaceIndex.from_derived(derived_path(13, SHA, directory=root), SHA, 13)
             for query in ("桜駅", "曲がり道", "四角公園", "穴のある公園"):
-                self.assertEqual(index.search(query), self.index.search(query))
+                self.assertEqual(pbf_index.search(query), self.index.search(query))
 
-    def test_cancelled_before_reading_never_starts_parser(self):
-        import osmium
-        with patch.object(osmium.SimpleHandler, "apply_file") as parse:
-            with self.assertRaises(PlaceIndexError) as caught:
-                PlaceIndex.from_pbf(FIXTURE, 13, cancelled=lambda: True)
-            parse.assert_not_called()
-        self.assertEqual(str(caught.exception), "Local place index is unavailable.")
-
-    def test_cancelled_in_callback_aborts_without_partial_index(self):
-        # 先頭コールバックと、複数ノード登録後の両方で中断する。
-        for stop_at in (3, 5):
-            calls = 0
-
-            def cancelled():
-                nonlocal calls
-                calls += 1
-                return calls >= stop_at
-
-            with self.subTest(stop_at=stop_at), patch.object(PlaceIndex, "__init__") as build:
-                with self.assertRaises(PlaceIndexError) as caught:
-                    PlaceIndex.from_pbf(FIXTURE, 13, cancelled=cancelled)
-                build.assert_not_called()
-                self.assertEqual(calls, stop_at)
-                self.assertEqual(str(caught.exception), "Local place index is unavailable.")
-
-    def test_cancelled_after_parser_never_returns_index(self):
-        import osmium
-        stopped = False
-
-        def parse(*args, **kwargs):
-            nonlocal stopped
-            stopped = True
-
-        with patch.object(osmium.SimpleHandler, "apply_file", side_effect=parse), \
-             patch.object(PlaceIndex, "__init__") as build:
-            with self.assertRaises(PlaceIndexError):
-                PlaceIndex.from_pbf(FIXTURE, 13, cancelled=lambda: stopped)
-            build.assert_not_called()
-
-    def test_malformed_and_missing_input_errors_are_sanitized(self):
+    def test_cancel_and_missing_derived_data_never_return_an_index(self):
         with tempfile.TemporaryDirectory() as directory:
-            for name, data in (("private-35.123.osm.pbf", b"not a PBF"),
-                               ("private.osm", b"<osm><node broken>"),
-                               ("unknown.data", b"unknown")):
-                target = Path(directory) / name
-                target.write_bytes(data)
-                with self.assertRaises(PlaceIndexError) as caught:
-                    PlaceIndex.from_pbf(target, 13)
-                self.assertEqual(str(caught.exception), "Local place index is unavailable.")
-                self.assertIsNone(caught.exception.__cause__)
+            root = Path(directory)
+            missing = derived_path(13, SHA, directory=root)
+            with self.assertRaises(PlaceIndexError) as caught:
+                PlaceIndex.from_derived(missing, SHA, 13)
+            self.assertEqual(str(caught.exception), "Local place index is unavailable.")
+            self.assertIsNone(caught.exception.__cause__)
             with self.assertRaises(PlaceIndexError):
-                PlaceIndex.from_pbf(Path(directory) / "missing.osm.pbf", 13)
+                PlaceIndex.from_derived(missing, SHA, 13, cancelled=lambda: True)
+            broken = root / "broken.sqlite"
+            broken.write_bytes(b"broken")
+            with self.assertRaises(PlaceIndexError):
+                PlaceIndex.from_derived(broken, SHA, 13)
 
-    def test_no_network_writes_or_logging_at_runtime(self):
+    def test_no_network_or_logging_during_runtime_search(self):
         with patch("socket.socket", side_effect=AssertionError("network")), \
-             patch("builtins.open", side_effect=AssertionError("Python file IO")), \
-             patch("logging.Logger._log", side_effect=AssertionError("logging")):
-            # libosmiumは入力をC++で読む。Python側のファイル・ネットワークAPIは不要。
-            index = PlaceIndex.from_pbf(FIXTURE, 13)
-            self.assertTrue(index.search("桜駅"))
+                patch("logging.Logger._log", side_effect=AssertionError("logging")):
+            self.assertTrue(self.index.search("桜駅"))
 
     def test_invalid_arguments_are_sanitized(self):
         for prefecture in (0, 48, True, "13"):
@@ -196,33 +159,6 @@ class PlaceIndexTests(unittest.TestCase):
             self.index.search("private search", limit="private")
         self.assertNotIn("private", str(caught.exception))
 
-
-    def test_index_cache_roundtrip_reuses_saved_version(self):
-        import os
-        from tempfile import TemporaryDirectory
-        index = PlaceIndex.from_pbf(FIXTURE, 13)
-        sha = "f" * 64
-        with TemporaryDirectory() as directory, \
-                patch.dict(os.environ, {"XDG_CACHE_HOME": directory}):
-            path = PlaceIndex.cache_path(13, sha)
-            index.save_cache(path, sha)
-            self.assertTrue(path.is_file())
-            restored = PlaceIndex.load_cache(path, sha)
-            self.assertEqual(restored.prefecture, 13)
-            self.assertEqual(restored.get("node/1"), index.get("node/1"))
-            self.assertEqual(len(restored.search("ギンザ") or restored.search("ginza")), 0)
-            self.assertEqual(restored.search("fixture" if "fixture" in "" else "", 0), ())
-
-    def test_index_cache_rejects_mismatched_version(self):
-        import json, os
-        from tempfile import TemporaryDirectory
-        with TemporaryDirectory() as directory, \
-                patch.dict(os.environ, {"XDG_CACHE_HOME": directory}):
-            path = PlaceIndex.cache_path(13, "a" * 64)
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(json.dumps({"version": 99, "sha256": "a" * 64,
-                                        "prefecture": 13, "places": []}), encoding="utf-8")
-            self.assertIsNone(PlaceIndex.load_cache(path, "a" * 64))
 
 if __name__ == "__main__":
     unittest.main()

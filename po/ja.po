@@ -476,6 +476,9 @@ msgid "Save failed."
 msgstr "ソースにアクセスできません。"
 
 #: osm_region_view.py:30
+msgid "Map data could not be prepared."
+msgstr "地図データの準備ができませんでした。"
+
 msgid "Unexpected redirect."
 msgstr "想定外の転送でした。"
 

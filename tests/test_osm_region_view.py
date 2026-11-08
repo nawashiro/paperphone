@@ -3,6 +3,7 @@
 from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
+import tempfile
 import unittest
 from unittest.mock import Mock, patch
 
@@ -17,6 +18,7 @@ from paperphone.osm_extracts import ExtractState
 from paperphone.i18n import gettext_for
 from paperphone.osm_region_view import OsmRegionView, ERRORS
 _ = gettext_for()
+from paperphone.osm_derived import derived_path
 from paperphone.osm_store import ExtractFailure, ExtractUpdate
 from paperphone.selection import GenerationSnapshot, SelectionModel
 
@@ -26,16 +28,31 @@ class OsmRegionViewTests(unittest.TestCase):
     def setUpClass(cls):
         Gtk.init()
 
+    SYNTHETIC_XML = ('<osm version="0.6"><node id="1" lat="35.68" lon="139.76" version="1">'
+                     '<tag k="name" v="東京駅"/><tag k="railway" v="station"/></node>'
+                     '<node id="2" lat="35.681" lon="139.76" version="1"/>'
+                     '<way id="10"><nd ref="1"/><nd ref="2"/><tag k="highway" v="footway"/></way></osm>')
+
+    @classmethod
+    def setUpClass(cls):
+        Gtk.init()
+
     def make(self, fix=None, load=None, update=None, delete=None):
         store = Mock()
-        cached = SimpleNamespace(basis=datetime(2026, 1, 2, tzinfo=timezone.utc),
-                                 state=ExtractState(bytes_count=132000000))
-        store.load.return_value = cached
-        store.update.return_value = ExtractUpdate(cached, True)
-        store.delete.return_value = None
-        for method, value in (("load", load), ("update", update), ("delete", delete)):
-            if value is not None:
-                getattr(store, method).side_effect = value
+        # 版付きの抽出版には、派生生成が受け取れる実体を仮置きする。
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        fixture = Path(directory.name) / "fixture.osm"
+        fixture.write_text(self.SYNTHETIC_XML, encoding="utf-8")
+
+        def cached_extract(code):
+            return SimpleNamespace(prefecture=code, path=fixture, sha256="e" * 64,
+                                   basis=datetime(2026, 1, 2, tzinfo=timezone.utc),
+                                   state=ExtractState(bytes_count=132000000))
+        store.load.side_effect = load if load is not None else cached_extract
+        store.update.side_effect = (lambda code, confirmed=True:
+                                    ExtractUpdate(cached_extract(code), True)) if update is None else update
+        store.delete.side_effect = delete if delete is not None else (lambda code: None)
         view = OsmRegionView(store, fix=fix, submit=lambda fn: fn(), dispatch=lambda fn: fn())
         self.addCleanup(view.close)
         return view, store
@@ -141,6 +158,74 @@ class OsmRegionViewTests(unittest.TestCase):
             self.assertFalse(data.is_file())
             self.assertFalse(manifest.is_file())
             self.assertTrue(outside.is_file())  # manifestが参照しないファイルは消さない。
+
+
+
+class OsmRegionDerivedTests(unittest.TestCase):
+    """抽出の読込・更新直後に派生データが作られ、失敗では冊子を妨げない。"""
+
+    SYNTHETIC_XML = ('<osm version="0.6"><node id="1" lat="35.68" lon="139.76" version="1">'
+                     '<tag k="name" v="東京駅"/><tag k="railway" v="station"/></node>'
+                     '<node id="2" lat="35.681" lon="139.76" version="1"/>'
+                     '<way id="10"><nd ref="1"/><nd ref="2"/><tag k="highway" v="footway"/></way></osm>')
+
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.store = Mock()
+
+    def extract(self, valid=True, sha="e" * 64):
+        path = self.root / f"JP-13-{sha}.osm"
+        path.write_bytes(self.SYNTHETIC_XML.encode("utf-8") if valid else b"this is not osm data")
+        return SimpleNamespace(prefecture=13, path=path, sha256=sha, basis=SimpleNamespace())
+
+    def run_view(self, store):
+        jobs = []
+        view = OsmRegionView(store, submit=jobs.append, dispatch=lambda fn: fn())
+        self.addCleanup(view.close)
+        # ワーカーへの差替えは即時実行していないため、積みを順に流してから
+        # 以降の明示操作は直行させる。
+        view.prefecture.set_selected(13)
+        while jobs:
+            jobs.pop(0)()
+        view._submit = lambda fn: fn()
+        return view
+
+    def test_loaded_extract_builds_its_derived_data_before_selection(self):
+        extract = self.extract()
+        self.store.load.return_value = extract
+        view = self.run_view(self.store)
+        self.assertIs(view.selected_extract, extract)
+        self.assertTrue(derived_path(13, "e" * 64, directory=self.root).is_file())
+
+    def test_updated_extract_regenerates_a_changed_version(self):
+        first = self.extract()
+        self.store.load.return_value = first
+        self.store.update.return_value = ExtractUpdate(first, True)
+        view = self.run_view(self.store)
+        self.assertTrue(derived_path(13, "e" * 64, directory=self.root).is_file())
+        second = self.extract(sha="f" * 64)
+        self.store.update.return_value = ExtractUpdate(second, True)
+        view._run(True)
+        self.assertTrue(derived_path(13, "f" * 64, directory=self.root).is_file())
+        self.assertFalse(derived_path(13, "e" * 64, directory=self.root).is_file())
+        self.assertIs(view.selected_extract, second)
+
+    def test_generation_failure_shows_reason_and_keeps_the_page_usable(self):
+        extract = self.extract(valid=False)
+        self.store.load.return_value = extract
+        view = self.run_view(self.store)
+        self.assertIsNone(view.selected_extract)
+        self.assertIn("Map data", view.status.get_text())
+        self.assertFalse(derived_path(13, "e" * 64, directory=self.root).exists())
+        view.prefecture.set_selected(1)  # 失敗後に他県へ移動できる。
+
+    def test_download_failure_is_reported_as_before(self):
+        self.store.load.side_effect = ExtractFailure("cache")
+        view = self.run_view(self.store)
+        self.assertIsNone(view.selected_extract)
+        self.assertIn("damaged", view.status.get_text())
 
 
 if __name__ == "__main__":

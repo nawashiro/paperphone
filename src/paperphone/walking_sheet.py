@@ -6,11 +6,11 @@ import json
 import math
 from pathlib import Path
 
+from .osm_derived import DerivedError, DerivedStore, derived_path
 from .places import Place, PlaceIndex
 from .prefectures import prefecture_at
 from .selection import ItemKey, SelectableItem
-from .walking import _bounds, WalkingError, WalkingRoute, WalkingRouter
-from .walking_store import build_full_graph, graph_path, load_graph, save_graph, _router_from_arrays
+from .walking import WalkingError, WalkingRoute, WalkingRouter
 
 OSM_ATTRIBUTION = "© OpenStreetMap contributors · ODbL 1.0"
 OSM_ATTRIBUTION_SHORT = "© OpenStreetMap contributors · ODbL 1.0"
@@ -76,100 +76,48 @@ def _belongs(index, point, prefecture):
         return False
 
 
-_ROUTER_CACHE: "MutableMapping[tuple, WalkingRouter]" = None
-
-
-def _router_cache():
-    """同じPBF版・同じ探索範囲で一度だけ歩行者グラフを作る。
-
-    生成のたびにPBFを走査し直さないため、探索範囲か抽出版が変わった時だけ
-    作り直す。エントリーは既定で8つまで。保存はUIのデータと併せてメモリ内だけ。
-    """
-    global _ROUTER_CACHE
-    if _ROUTER_CACHE is None:
-        from collections import OrderedDict
-
-        class RouterCache(OrderedDict):
-            def __init__(self):
-                super().__init__()
-                self._cap = 8
-
-            def __missing__(self, key):
-                router = WalkingRouter.from_pbf(key[0], bounds=key[1], max_snap_m=key[2])
-                while len(self) >= self._cap:
-                    self.popitem(last=False)
-                self[key] = router
-                return router
-        _ROUTER_CACHE = RouterCache()
-    return _ROUTER_CACHE
-
-
-def _router_from_graph_cache(extract, bounds):
-    """保存済み県グラフからの経路用スライス。版が一致しなければNone。"""
+def _source(extract):
+    """抽出版に対応する派生データ。版が正しく構成されていないなら失敗。"""
     try:
-        stored = load_graph(graph_path(extract.prefecture, extract.sha256,
-                                       directory=Path(extract.path).parent),
-                            extract.sha256, extract.prefecture)
-        if stored is None:
-            return None
-        node_ids, coordinates, edges = stored
-        return _router_from_arrays(node_ids, coordinates, edges, bounds)
-    except (OSError, ValueError, TypeError, WalkingError):
-        return None
+        return derived_path(extract.prefecture, extract.sha256,
+                            directory=Path(extract.path).parent)
+    except (DerivedError, TypeError):
+        raise WalkingError("unavailable") from None
 
 
-def _router_from_full_graph(extract, bounds):
-    """版グラフが未保存なら一度だけ県全域で作って保存し、その上でスライスする。"""
+def _router_from_derived(extract, bounds):
+    """版付き派生データの範囲照会から経路を作る。版が一致しない物は失敗。"""
+    store = DerivedStore.open(_source(extract), extract.sha256, extract.prefecture)
+    if store is None:
+        raise WalkingError("unavailable")
     try:
-        import numpy
-        nodes, edges = build_full_graph(extract.path)
-        node_ids = numpy.array(sorted(nodes), dtype=numpy.int64)
-        coordinates = numpy.array([nodes[node] for node in sorted(nodes)], dtype=numpy.float64)
-        edge_array = numpy.array(sorted(set(edges)), dtype=numpy.int64)
-    except (ImportError, Exception):
-        return None
-    path = graph_path(extract.prefecture, extract.sha256,
-                      directory=Path(extract.path).parent)
-    if not save_graph(path, extract.sha256, extract.prefecture,
-                      node_ids, coordinates, edge_array):
-        return None
-    try:
-        return _router_from_arrays(node_ids, coordinates, edge_array, bounds)
-    except (OSError, ValueError, TypeError, WalkingError):
-        return None
-
-
-def _get_router(path, bounds):
-    key = (str(path), tuple(_bounds(bounds)), 100.0)
-    return _router_cache()[key]
+        return store.router(bounds, max_snap_m=100.0)
+    finally:
+        store.close()
 
 
 def build_walking_sheet(extract, index: PlaceIndex, departure: Place, destination: Place, *,
                         router_factory=None) -> WalkingSheet:
-    """HTTPや位置取得を行わず、選択済みの版別PBFから経路を組み立てる。
+    """HTTPや位置取得を行わず、選択済みの版から経路を組み立てる。
 
     重いI/Oなのでホスト画面はワーカーから呼ぶ。異なる県・版のインデックスを
     混ぜず、道路上の経路と元のPOIの位置ずれを別に保持する。
     """
     if departure is None or destination is None:
         raise RoutePreparationError("missing-endpoints")
+    source_path = _source(extract)
     if (index.prefecture != extract.prefecture or index.source_path is None
-            or Path(index.source_path).resolve() != Path(extract.path).resolve()):
+            or Path(index.source_path).resolve() != source_path.resolve()):
         raise RoutePreparationError("source-mismatch")
     if not all(_belongs(index, point, extract.prefecture) for point in (departure, destination)):
         raise RoutePreparationError("outside-prefecture")
     bounds = routing_bounds(departure, destination)
     if router_factory is not None:
-        # テストや合成試験では差替中のBboxからの取り込みを行わない。
-        router = router_factory(extract.path, bounds=bounds, max_snap_m=100)
+        # テストと合成試験では、幾何は差替え先から届く。
+        router = router_factory(bounds)
     else:
-        # 保存済みの県グラフ（版＋Bzip）があれば、経路ごとのPBF走査をスキップする。
-        router = _router_from_graph_cache(extract, bounds)
-        if router is None:
-            router = _router_from_full_graph(extract, bounds)
-        if router is None:
-            router = _get_router(extract.path, bounds)
+        router = _router_from_derived(extract, bounds)
     route = router.route(departure.latitude, departure.longitude,
                          destination.latitude, destination.longitude)
-    return WalkingSheet(extract.prefecture, extract.basis, extract.sha256, Path(extract.path),
+    return WalkingSheet(extract.prefecture, extract.basis, extract.sha256, source_path,
                         departure, destination, route, bounds)

@@ -1,29 +1,24 @@
-"""ローカル地名インデックスで出発地・目的地を選ぶGTKビュー。"""
+"""版付き派生データで出発地・目的地を選ぶGTKビュー。"""
 
-from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor
-from threading import Lock
 from threading import Event
+from pathlib import Path
 
 import gi
 gi.require_version("Gtk", "4.0")
 from gi.repository import GLib, Gtk
 
 from .i18n import gettext_for
+from .osm_derived import derived_path
 from .places import Place, PlaceIndex
 from .prefectures import prefecture_at
 
 _ = gettext_for()
 
 
-_INDEX_CACHE_LIMIT = 8
-_INDEX_CACHE: OrderedDict = OrderedDict()
-_INDEX_CACHE_LOCK = Lock()
-
-
 class PlaceSelectionView(Gtk.Box):
     def __init__(self, index=None, *, fix=None, submit=None, dispatch=None,
-                 index_factory=PlaceIndex.from_pbf):
+                 index_factory=PlaceIndex.from_derived):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         self.index = None
         self._fix = fix
@@ -58,7 +53,7 @@ class PlaceSelectionView(Gtk.Box):
             chosen = Gtk.Label(label=_("No place selected."), xalign=0)
             chosen.set_wrap(True)
             self.results[endpoint], self.chosen_labels[endpoint] = rows, chosen
-            # 候負を読み切るまでスクロールなしに表示する。選択が済むと候負は消える。
+            # 候補を読み切るまでスクロールなしに表示する。選択が済むと候補は消える。
             for widget in (entry, chosen, rows):
                 self.append(widget)
         self.append(self.status)
@@ -97,8 +92,7 @@ class PlaceSelectionView(Gtk.Box):
             entry.set_sensitive(not busy and self.index is not None)
         self._busy = busy
         self.current_button.set_sensitive(not busy and self.index is not None and self._fix is not None)
-        # 索引の作成中は進行を随時束ねる。版のPBF走査の進捗は取得元手順に
-        # 細かく依存するため、便宜的に常時くるませる。
+        # 派生データの読込中は進行を随時束ねる。
         self.progress.set_visible(busy)
         if busy:
             self.progress.pulse()
@@ -129,22 +123,7 @@ class PlaceSelectionView(Gtk.Box):
             self.use_current_location()
 
     def load_extract(self, extract):
-        """取得済みの版別PBFだけをワーカーで読む。取得・外部検索はしない。
-
-        同じ抽出版（県・SHA-256・パス）の索引は作り直さない：
-        - メモリ内（この起動の中）
-        - キャッシュディスク（起動のたびに0.1秒程度のJSON読取で済む）
-        の順に探し、なければPBF走査後に両方へ保存する。
-        """
-        cached = self._cached_index(extract)
-        if cached is not None:
-            self._index_ready(self._token, cached)
-            return
-        disk = self._disk_index(extract)
-        if disk is not None:
-            self._store_index(extract, disk)
-            self._index_ready(self._token, disk)
-            return
+        """抽出版に対応する派生データだけを読む。生成・更新・外部検索はしない。"""
         self.set_index(None)
         token = self._token
         cancelled = Event()
@@ -154,12 +133,10 @@ class PlaceSelectionView(Gtk.Box):
 
         def work():
             try:
-                index = self._cached_index(extract)
-                if index is None:
-                    index = self._index_factory(
-                        extract.path, prefecture=extract.prefecture, cancelled=cancelled.is_set)
-                    self._store_index(extract, index)
-                    self._save_disk_index(extract, index)
+                path = derived_path(extract.prefecture, extract.sha256,
+                                    directory=Path(extract.path).parent)
+                index = self._index_factory(path, extract.sha256, extract.prefecture,
+                                            cancelled=cancelled.is_set)
             except Exception:
                 self._dispatch(lambda: self._index_ready(token, None))
             else:
@@ -168,44 +145,6 @@ class PlaceSelectionView(Gtk.Box):
             self._submit(work)
         except Exception:
             self._index_ready(token, None)
-
-    @staticmethod
-    def _index_key(extract):
-        sha = getattr(extract, "sha256", "")
-        prefecture = getattr(extract, "prefecture", None)
-        return (str(extract.path), prefecture, sha)
-
-    def _cached_index(self, extract):
-        key = self._index_key(extract)
-        with _INDEX_CACHE_LOCK:
-            if key in _INDEX_CACHE:
-                _INDEX_CACHE.move_to_end(key)
-                return _INDEX_CACHE[key]
-        return None
-
-    def _disk_index(self, extract):
-        sha = getattr(extract, "sha256", "")
-        if not sha:
-            return None
-        return PlaceIndex.load_cache(
-            PlaceIndex.cache_path(extract.prefecture, sha), sha)
-
-    def _save_disk_index(self, extract, index):
-        sha = getattr(extract, "sha256", "")
-        if not sha or getattr(index, "prefecture", None) != extract.prefecture:
-            return
-        try:
-            index.save_cache(PlaceIndex.cache_path(extract.prefecture, sha), sha)
-        except Exception:
-            # 検出できない書出し失敗は、次の起動でPBF走査に戻るだけ。
-            pass
-
-    def _store_index(self, extract, index):
-        key = self._index_key(extract)
-        with _INDEX_CACHE_LOCK:
-            _INDEX_CACHE[key] = index
-            while len(_INDEX_CACHE) > _INDEX_CACHE_LIMIT:
-                _INDEX_CACHE.popitem(last=False)
 
     def _index_ready(self, token, index):
         if self._closed or token != self._token:
@@ -305,7 +244,7 @@ class PlaceSelectionView(Gtk.Box):
         return True
 
     def cancel(self):
-        """読込中の索引作成と検索を打ち切る。選択はそのまま残る。"""
+        """読込中の索引読取と検索を打ち切る。選択はそのまま残る。"""
         if self._build_cancel is not None:
             self._build_cancel.set()
         self._token += 1

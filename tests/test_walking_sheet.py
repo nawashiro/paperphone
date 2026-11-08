@@ -7,11 +7,13 @@ import tempfile
 from types import SimpleNamespace
 import unittest
 
+from paperphone.osm_derived import build_derived, derived_path
 from paperphone.places import Place, PlaceIndex
 from paperphone.selection import GenerationSnapshot
-from paperphone.walking import WalkingError
+from paperphone.walking import WalkingError, WalkingRoute
 from paperphone.walking_sheet import build_walking_sheet, RoutePreparationError
 
+SHA = "b" * 64
 XML = '''<osm version="0.6">
 <node id="1" lat="35.68" lon="139.76"><tag k="name" v="出発駅"/><tag k="railway" v="station"/></node>
 <node id="2" lat="35.681" lon="139.76"/>
@@ -28,10 +30,12 @@ class WalkingSheetTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
-        self.path = Path(self.directory.name) / "map.osm"
+        self.root = Path(self.directory.name)
+        self.path = self.root / "map.osm"
         self.path.write_text(XML, encoding="utf-8")
-        self.index = PlaceIndex.from_pbf(self.path, 13)
-        self.extract = SimpleNamespace(prefecture=13, path=self.path, basis=NOW, sha256="a" * 64)
+        build_derived(self.path, 13, SHA, directory=self.root)
+        self.index = PlaceIndex.from_derived(derived_path(13, SHA, directory=self.root), SHA, 13)
+        self.extract = SimpleNamespace(prefecture=13, path=self.path, basis=NOW, sha256=SHA)
         self.start = self.index.get("node/1")
         self.end = self.index.get("node/3")
 
@@ -55,7 +59,8 @@ class WalkingSheetTests(unittest.TestCase):
         with self.assertRaises(RoutePreparationError) as caught:
             build_walking_sheet(self.extract, self.index, None, self.end)
         self.assertEqual(caught.exception.reason, "missing-endpoints")
-        for attr, value in (("prefecture", 27), ("source_path", str(self.path.parent / "another.osm"))):
+        for attr, value in (("prefecture", 27), ("source_path", str(self.root / "another.osm")),
+                            ("source_path", None)):
             original = getattr(self.index, attr)
             setattr(self.index, attr, value)
             with self.assertRaises(RoutePreparationError) as caught:
@@ -85,6 +90,29 @@ class WalkingSheetTests(unittest.TestCase):
         self.assertGreater(sheet.route.start_snap_m, 0)
         self.assertNotEqual(sheet.route.points[0], (current.latitude, current.longitude))
         self.assertEqual(sheet.route.points[0], (35.68, 139.76))
+
+    def test_absent_derived_data_fails_without_scanning_the_extract(self):
+        derived_path(13, SHA, directory=self.root).unlink()
+        with self.assertRaises(WalkingError) as caught:
+            build_walking_sheet(self.extract, self.index, self.start, self.end)
+        self.assertEqual(caught.exception.reason, "unavailable")
+
+    def test_router_selection_honours_an_injected_slice(self):
+        seen = {}
+        def factory(bounds):
+            seen["bounds"] = bounds
+            return InjectedRouter()
+        sheet = build_walking_sheet(self.extract, self.index, self.start, self.end,
+                                    router_factory=factory)
+        self.assertEqual(sheet.route.points, ((35.68, 139.76), (35.681, 139.76), (35.682, 139.76)))
+        self.assertIsInstance(seen["bounds"], tuple)
+        self.assertEqual(len(seen["bounds"]), 4)
+
+
+class InjectedRouter:
+    def route(self, *coordinates):
+        return WalkingRoute(((35.68, 139.76), (35.681, 139.76), (35.682, 139.76)),
+                            260.0, 260.0 / 1.4, 0.0, 0.0)
 
 
 if __name__ == "__main__":

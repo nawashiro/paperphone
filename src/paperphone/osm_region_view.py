@@ -12,6 +12,7 @@ gi.require_version("Gtk", "4.0")
 from gi.repository import GLib, Gtk
 
 from .i18n import N_, gettext_for, language_code
+from .osm_derived import DerivedError, ensure_derived
 from .osm_store import ExtractFailure, ExtractUpdate
 from .prefectures import PREFECTURES, prefecture_at
 
@@ -29,6 +30,7 @@ ERRORS = {
     "storage": N_("Save failed."),
     "redirect": N_("Unexpected redirect."),
     "confirmation": N_("Not confirmed."),
+    "derived": N_("Map data could not be prepared."),
 }
 
 
@@ -140,6 +142,12 @@ class OsmRegionView(Gtk.Box):
                           else ExtractUpdate(self.store.load(code), False))
                 if result.extract is None:
                     raise ExtractFailure("missing")
+                # 保存済み抽出版に対する派生データをここで一度だけ作る。
+                ensure_derived(result.extract,
+                               cancelled=lambda: self._closed or generation != self._generation)
+            except DerivedError as error:
+                if error.reason != "cancelled":
+                    self._dispatch(lambda: self._finish(None, "derived", generation))
             except ExtractFailure as error:
                 reason = error.reason
                 self._dispatch(lambda: self._finish(None, reason, generation))

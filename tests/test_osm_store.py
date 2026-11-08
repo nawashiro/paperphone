@@ -168,6 +168,26 @@ class ExtractStoreTests(unittest.TestCase):
                 self.store.update(code, confirmed=True)
         self.assertFalse(self.requests)
 
+    def test_delete_removes_extract_and_its_derived_data(self):
+        first = self.update(Stream()).extract
+        derived = Path(self.temp.name) / f"JP-13-{first.sha256}.sqlite"
+        derived.touch()
+        other = Path(self.temp.name) / "JP-27-2080.sqlite"
+        other.touch()
+        self.store.delete(13)
+        self.assertFalse(derived.is_file())
+        self.assertFalse(first.path.is_file())
+        self.assertTrue(other.is_file())
+        other.unlink()
+
+    def test_delete_all_covers_every_prefecture_derived_data(self):
+        first = self.update(Stream()).extract
+        derived = Path(self.temp.name) / f"JP-13-{first.sha256}.sqlite"
+        derived.touch()
+        self.store.delete_all()
+        self.assertFalse(derived.is_file())
+        self.assertEqual(list(Path(self.temp.name).glob("JP-*")), [])
+
     def test_external_redirect_is_rejected(self):
         for url in ("http://osm.download.movisda.io/admin/JP-13-latest.osm.pbf", "https://example.invalid/map"):
             with self.assertRaises(ExtractFailure):
