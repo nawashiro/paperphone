@@ -217,7 +217,7 @@ class OsmRegionDerivedTests(unittest.TestCase):
         self.store.load.return_value = extract
         view = self.run_view(self.store)
         self.assertIsNone(view.selected_extract)
-        self.assertIn("Map data", view.status.get_text())
+        self.assertEqual(view.status.get_text(), _(ERRORS["derived"]))
         self.assertFalse(derived_path(13, "e" * 64, directory=self.root).exists())
         view.prefecture.set_selected(1)  # 失敗後に他県へ移動できる。
 
@@ -225,7 +225,7 @@ class OsmRegionDerivedTests(unittest.TestCase):
         self.store.load.side_effect = ExtractFailure("cache")
         view = self.run_view(self.store)
         self.assertIsNone(view.selected_extract)
-        self.assertIn("damaged", view.status.get_text())
+        self.assertEqual(view.status.get_text(), _(ERRORS["cache"]))
 
 
 if __name__ == "__main__":
