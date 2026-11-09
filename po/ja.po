@@ -1,8 +1,10 @@
+#. 空文字列を _() に渡すとカタログのヘッダーが返るので、素の空にしておく。
+#: src/paperphone/weather_location_view.py:46
 msgid ""
 msgstr ""
 "Project-Id-Version: paperphone 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-08 03:38+0900\n"
+"POT-Creation-Date: 2026-11-09 04:01+0000\n"
 "PO-Revision-Date: 2026-11-07 00:00+0000\n"
 "Last-Translator: Paper Phone contributors\n"
 "Language-Team: Japanese\n"
@@ -12,1057 +14,985 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: application_services.py:43
-msgid "Choose both departure and destination."
-msgstr "出発地と目的地の両方を選んでください。"
-
-#: application_services.py:44
-msgid "The map index and selected extract do not match."
-msgstr "地名索引と、選択中の抽出版が一致しません。"
-
-#: application_services.py:45
-msgid "An endpoint is outside the selected prefecture."
-msgstr "出発地または目的地が選択した都道府県の範囲外です。"
-
-#: application_services.py:46
-msgid "The walking road graph is disconnected between these endpoints."
-msgstr "探索範囲内で、出発地と目的地の間の歩行者グラフがつながっていません。"
-
-#: application_services.py:47
-msgid "No walking road is close enough to an endpoint."
-msgstr "出発地または目的地の近くに、接続できる歩行者用の道路がありません。"
-
-#: application_services.py:48
-msgid "No walking roads are available in this area."
-msgstr "この範囲内に歩行者用の道路がありません。"
-
-#: application_services.py:49
-msgid "An endpoint is outside the routing area."
-msgstr "出発地または目的地が経路の探索範囲外です。"
-
-#: application_services.py:50
-msgid "The map content does not fit the printable page."
-msgstr "地図の内容が印刷ページに収まりません。"
-
-#: application_services.py:51
-msgid "The walking route is invalid."
-msgstr "徒歩経路のデータが不正です。"
-
-#: application_services.py:52
-msgid "The walking endpoints are invalid."
-msgstr "徒歩経路の出発地または目的地が不正です。"
-
-#: application_services.py:53
-msgid "The routing area is invalid."
-msgstr "経路の探索範囲が不正です。"
-
-#: application_services.py:54
-msgid "The local road data could not be read."
-msgstr "ローカルの道路データを読み込めません。"
-
-#: application_services.py:55
-msgid "The local map source is unavailable."
-msgstr "ローカルの地図データを利用できません。"
-
-#: application_services.py:56 application_services.py:57
-msgid "The local walking route is unavailable."
-msgstr "ローカルの徒歩経路を利用できません。"
-
-#: application_services.py:58
-msgid "The booklet could not be rendered."
-msgstr "冊子を描画できません。"
-
-#: application_services.py:108
-#, python-brace-format
-msgid "Panel {panel}: some text was shortened ({count})."
-msgstr "区画{panel}: 文章を省略しました（{count}件）。"
-
-#: application_services.py:109
-#, python-brace-format
-msgid "Panel {panel}: items did not fit ({count})."
-msgstr "区画{panel}: 掲載できない項目があります（{count}件）。"
-
-#: application_services.py:110
-#, python-brace-format
-msgid "Panel {panel}: an invalid date could not be printed ({count})."
-msgstr "区画{panel}: 不正な日付を掲載できませんでした（{count}件）。"
-
-#: application_services.py:111
-#, python-brace-format
-msgid "Panel {panel}: weather data could not be printed ({count})."
-msgstr "区画{panel}: 天気データを掲載できませんでした（{count}件）。"
-
-#: application_services.py:112
-#, python-brace-format
-msgid "Map: a location name was shortened ({count})."
-msgstr "地図: 地点名を省略しました（{count}件）。"
-
-#: application_services.py:114
-msgid "Some booklet content could not be printed."
-msgstr "冊子の一部を掲載できませんでした。"
-
-#: application_view.py:36
-msgid "Settings"
-msgstr "設定"
-
-#: application_view.py:36
-msgid "Language"
-msgstr "言語"
-
-#: application_view.py:36
-msgid "Name on cover"
-msgstr "表紙の名前"
-
-#: application_view.py:36
-msgid "MET Norway client contact"
-msgstr "MET Norway用の連絡先"
-
-#: application_view.py:37 weather_location_view.py:40
-msgid "Location and client contact are sent to MET Norway."
-msgstr "位置情報と連絡先をMET Norwayへ送信します。"
-
-#: application_view.py:38
-msgid "Save settings"
-msgstr "設定を保存"
-
-#: application_view.py:38
-msgid "Invalid contact."
-msgstr "連絡先が正しくありません。"
-
-#: application_view.py:39
-msgid "Sources"
-msgstr "情報ソース"
-
-#: application_view.py:39 refresh_view.py:41
-msgid "Refresh selected sources"
-msgstr "選択したデータソースを更新"
-
-#: application_view.py:39 refresh_view.py:45
-msgid "Cancel"
-msgstr "キャンセル"
-
-#: application_view.py:40
-msgid "Sources from GNOME accounts."
-msgstr "GNOMEアカウントから取得"
-
-#: application_view.py:40
-msgid "Not read yet."
-msgstr "まだ読み込んでいません。"
-
-#: application_view.py:41
-msgid "No forecast left for today."
-msgstr "今日の天気はもうありません。"
-
-#: weather_location_view.py:32
-msgid "Credentials needed."
-msgstr "パスワードが必要"
-
-msgid "OK"
-msgstr "成功"
-
-#: application_view.py:41 application_view.py:63 application_view.py:64
-#: application_view.py:65
-msgid "Failed."
-msgstr "失敗"
-
-#: application_view.py:41 refresh_view.py:111
-msgid "Reading selected sources…"
-msgstr "選択したデータソースを読み込んでいます…"
-
-#: application_view.py:41
-msgid "Source access failed."
-msgstr "ソースにアクセスできません。"
-
-#: application_view.py:42
-msgid "CalDAV changes were not confirmed; cached items are excluded until acknowledged."
-msgstr "CalDAVの更新を確認できなかったため、除外を確認するまでキャッシュ済みの項目は使いません。"
-
-#: application_view.py:43
-msgid "I acknowledge exclusion of this source"
-msgstr "このソースを除外することを確認しました"
-
-#: application_view.py:43
-msgid "Selection changed. Generate again to update the PDF."
-msgstr "選択を変えました。PDFを更新するには、もう一度生成してください。"
-
-#: application_view.py:44
-msgid "Removed unavailable selections."
-msgstr "利用できなくなった項目は選択から外しました。"
-
-#: application_view.py:44 contact_selection.py:31 contact_selection.py:55
-msgid "Contacts"
-msgstr "連絡先"
-
-#: application_view.py:44
-msgid "Calendar"
-msgstr "Calendar"
-
-#: application_view.py:44
-msgid "Tasks"
-msgstr "Tasks"
-
-#: application_view.py:44
-msgid "Weather"
-msgstr "天気"
-
-#: application_view.py:45
-msgid "Walking map"
-msgstr "徒歩地図"
-
-#: application_view.py:45
-msgid "Photos"
-msgstr "Photos"
-
-#: application_view.py:45
-msgid "Paper apps"
-msgstr "紙アプリ"
-
-#: application_view.py:45
-msgid "PDF"
-msgstr "PDF"
-
-#: application_view.py:46
-msgid "Generate booklet"
-msgstr "冊子を生成"
-
-#: application_view.py:46
-msgid "Confirm unavailable source exclusions before generating."
-msgstr "利用できないソースの除外を確認してから、生成してください。"
-
-#: application_view.py:47
-msgid "Generating booklet…"
-msgstr "冊子を生成しています…"
-
-#: application_view.py:47
-msgid "Booklet ready. Later edits do not change this PDF."
-msgstr "冊子を生成しました。この後の変更はこのPDFに反映されません。"
-
-#: application_view.py:48
-msgid "Generation failed. Your previous PDF has been kept."
-msgstr "生成に失敗しました。以前のPDFはそのまま残しています。"
-
-#: application_view.py:49
-msgid "Walking map failed. The map is not included."
-msgstr "徒歩地図を生成できませんでした。地図は現在含みません。"
-
-#: application_view.py:50
-msgid "Source selection changed during refresh; old results were ignored."
-msgstr "更新中にソースの選択が変わったため、古い結果は捨てました。"
-
-#: application_view.py:51 refresh_view.py:126
-msgid "Refresh cancelled."
-msgstr "更新をキャンセルしました。"
-
-#: application_view.py:51
-msgid "No events for today."
-msgstr "今日の予定はありません。"
-
-#: application_view.py:52
-msgid "Photo selection is still in progress."
-msgstr "写真の選択と読み込みがまだ終わっていません。"
-
-#: application_view.py:53 osm_region_view.py:54
-msgid "Delete stored map data"
-msgstr "地図データを削除"
-
-#: application_view.py:53
-msgid "Map data deleted."
-msgstr "地図データを削除しました。"
-
-#: application_view.py:53
-msgid "Map data could not be deleted."
-msgstr "ローカルの道路データを読み込めません。"
-
-#: application_view.py:54
-msgid "Settings could not be saved."
-msgstr "更新を開始できませんでした。"
-
-#: application_view.py:55
-msgid "photo: excluded"
-msgstr "写真: 掲載しない"
-
-#: application_view.py:55
-msgid "weather: excluded"
-msgstr "天気: 掲載しない"
-
-#: application_view.py:55
-msgid "map: excluded"
-msgstr "地図: 掲載しない"
-
-#: application_view.py:55
-#, python-brace-format
-msgid "{source}: excluded"
-msgstr "{source}: 掲載しない"
-
-#: application_view.py:56
-#, python-brace-format
-msgid "Map failure: {reason}"
-msgstr "地図の失敗: {reason}"
-
-#: application_view.py:56
-msgid "Task List"
-msgstr "タスクリスト"
-
-#: application_view.py:56
-msgid "Address Book"
-msgstr "アドレス帳"
-
-#: application_view.py:61
-msgid "OK."
-msgstr "OK"
-
-#: application_view.py:62
-msgid "Not registered."
-msgstr "ソースが登録されていません。"
-
-#: booklet_asset_view.py:73 booklet_asset_view.py:100 booklet_asset_view.py:102
-msgid "Choose a local photo"
-msgstr "ローカルの写真を選ぶ"
-
-#: booklet_asset_view.py:74
-msgid "Clear photo"
-msgstr "写真を外す"
-
-#: booklet_asset_view.py:80 booklet_asset_view.py:236
-msgid "No photo selected."
-msgstr "写真を選択していません。"
-
-#: booklet_asset_view.py:85 booklet_asset_view.py:90 booklet_asset_view.py:244
-msgid "Paper app"
-msgstr "紙アプリ"
-
-#: booklet_asset_view.py:87 booklet_asset_view.py:242
-msgid "None"
-msgstr "なし"
-
-#: booklet_asset_view.py:91
-msgid "Notes"
-msgstr "Notes"
-
-#: booklet_asset_view.py:92
-msgid "Card cutting guides"
-msgstr "カード切り込み用の目印"
-
-#: booklet_asset_view.py:127
-msgid "Choosing a photo…"
-msgstr "写真を選択しています…"
-
-#: booklet_asset_view.py:147 booklet_asset_view.py:157
-msgid "Photo selection was cancelled."
-msgstr "写真選びを取り消しました。"
-
-#: booklet_asset_view.py:168
-msgid "Reading selected photo…"
-msgstr "選んだ写真を読み込んでいます…"
-
-#: booklet_asset_view.py:180
-msgid "The selected photo could not be read. Choose a readable local image."
-msgstr "選んだ写真を読めませんでした。読めるローカルの画像を選んでください。"
-
-#: booklet_asset_view.py:197
-msgid "Photo selected."
-msgstr "写真を選びました。"
-
-#: booklet_content.py:103
-msgid "All day"
-msgstr "終日"
-
-#: booklet_content.py:123 todo_selection.py:22
+#: src/paperphone/booklet_content.py:123 src/paperphone/todo_selection.py:22
 msgid "Today"
 msgstr "今日"
 
-#: booklet_content.py:125
+#: src/paperphone/booklet_content.py:125
 msgid "Tomorrow"
 msgstr "明日"
 
-#: booklet_content.py:127
+#: src/paperphone/booklet_content.py:127
 #, python-brace-format
 msgid "In {days} days"
 msgstr "{days}日後"
 
-#: booklet_content.py:129
+#: src/paperphone/booklet_content.py:129
 #, python-brace-format
 msgid "{days} days ago"
 msgstr "{days}日前"
 
-#: booklet_content.py:132 todo_selection.py:213
+#: src/paperphone/booklet_content.py:132 src/paperphone/todo_selection.py:213
 #, python-brace-format
 msgid "Due: {when}"
 msgstr "期限: {when}"
 
-#: booklet_content.py:186
-#, python-brace-format
-msgid "{name}'S"
-msgstr "{name}の"
-
-#: booklet_content.py:188
-msgid "PHONE"
-msgstr "Paper Phone"
-
-#: booklet_content.py:190
+#. FrontModule.toExtent: dd MMMM yyyy。日本語カタログは年月日の数値形式へ。
+#: src/paperphone/booklet_content.py:191
 msgid "%d %B %Y"
 msgstr "%Y年%m月%d日"
 
-#: booklet_content.py:197
+#: src/paperphone/booklet_content.py:198
 msgid "CONTACTS"
 msgstr "連絡先"
 
-#: booklet_content.py:197
+#: src/paperphone/booklet_content.py:198
 msgid "CALENDAR"
 msgstr "予定"
 
-#: booklet_content.py:197
+#: src/paperphone/booklet_content.py:198
 msgid "TASKS"
 msgstr "TODO"
 
-#: booklet_content.py:246
+#: src/paperphone/booklet_content.py:247
 msgid "WEATHER"
 msgstr "天気"
 
-#: booklet_maps.py:69
+#: src/paperphone/booklet_asset_view.py:73
+#: src/paperphone/booklet_asset_view.py:102
+#: src/paperphone/booklet_asset_view.py:104
+msgid "Choose a local photo"
+msgstr "ローカルの写真を選ぶ"
+
+#: src/paperphone/booklet_asset_view.py:74
+msgid "Clear photo"
+msgstr "写真を外す"
+
+#: src/paperphone/booklet_asset_view.py:82
+#: src/paperphone/booklet_asset_view.py:240
+msgid "No photo selected."
+msgstr "写真を選択していません。"
+
+#: src/paperphone/booklet_asset_view.py:87
+#: src/paperphone/booklet_asset_view.py:92
+#: src/paperphone/booklet_asset_view.py:248
+msgid "Paper app"
+msgstr "紙アプリ"
+
+#: src/paperphone/booklet_asset_view.py:89
+#: src/paperphone/booklet_asset_view.py:246
+msgid "None"
+msgstr "なし"
+
+#: src/paperphone/booklet_asset_view.py:93
+msgid "Notes"
+msgstr "Notes"
+
+#: src/paperphone/booklet_asset_view.py:94
+msgid "Card cutting guides"
+msgstr "カード切り込み用の目印"
+
+#: src/paperphone/booklet_asset_view.py:129
+msgid "Choosing a photo…"
+msgstr "写真を選択しています…"
+
+#: src/paperphone/booklet_asset_view.py:149
+#: src/paperphone/booklet_asset_view.py:159
+msgid "Photo selection was cancelled."
+msgstr "写真選びを取り消しました。"
+
+#: src/paperphone/booklet_asset_view.py:170
+msgid "Reading selected photo…"
+msgstr "選んだ写真を読み込んでいます…"
+
+#: src/paperphone/booklet_asset_view.py:182
+msgid "The selected photo could not be read. Choose a readable local image."
+msgstr "選んだ写真を読めませんでした。読めるローカルの画像を選んでください。"
+
+#: src/paperphone/booklet_maps.py:69
 msgid "MAPS"
 msgstr "地図"
 
-#: booklet_maps.py:70
+#: src/paperphone/booklet_maps.py:70
 msgid "LEAVING FROM"
 msgstr "出発地"
 
-#: booklet_maps.py:71
+#: src/paperphone/booklet_maps.py:71
 msgid "GOING TO"
 msgstr "目的地"
 
-#: contact_selection.py:36
+#: src/paperphone/contact_selection.py:31
+#: src/paperphone/contact_selection.py:55 src/paperphone/application_view.py:44
+msgid "Contacts"
+msgstr "連絡先"
+
+#: src/paperphone/contact_selection.py:36
 msgid "Select up to 7 contacts."
 msgstr "印刷する連絡先を7件まで選択できます。"
 
-#: contact_selection.py:41
+#: src/paperphone/contact_selection.py:41
 msgid "You can select up to 7 contacts."
 msgstr "連絡先は7件まで選択できます。"
 
-#: contact_selection.py:46
+#: src/paperphone/contact_selection.py:46
 msgid "No contacts with phone numbers are available."
 msgstr "電話番号のある連絡先はありません。"
 
-#: osm_region_view.py:21 osm_region_view.py:22
-msgid "Download failed."
-msgstr "ダウンロードに失敗しました。"
+#: src/paperphone/application_view.py:36
+msgid "Settings"
+msgstr "設定"
 
-#: osm_region_view.py:23
-msgid "Extract unavailable."
-msgstr "天気を取得しました。"
+#: src/paperphone/application_view.py:36
+msgid "Language"
+msgstr "言語"
 
-#: osm_region_view.py:24
-msgid "Access denied."
-msgstr "拒否されました。"
+#: src/paperphone/application_view.py:36
+msgid "Name on cover"
+msgstr "表紙の名前"
 
-#: osm_region_view.py:25
-msgid "Rate limited."
-msgstr "要求が絞られています。"
+#: src/paperphone/application_view.py:36
+msgid "MET Norway client contact"
+msgstr "MET Norway用の連絡先"
 
-#: osm_region_view.py:26
-msgid "Wait before retrying."
-msgstr "少し待ってからもう一度試してください。"
+#: src/paperphone/application_view.py:37
+#: src/paperphone/weather_location_view.py:43
+msgid "Location and client contact are sent to MET Norway."
+msgstr "位置情報と連絡先をMET Norwayへ送信します。"
 
-#: osm_region_view.py:27
-msgid "Downloaded data is invalid."
-msgstr "経路の探索範囲が不正です。"
+#: src/paperphone/application_view.py:38
+msgid "Save settings"
+msgstr "設定を保存"
 
-#: osm_region_view.py:28
-msgid "Saved data is damaged."
-msgstr "保存してある地図データが壊れています。"
+#: src/paperphone/application_view.py:38
+msgid "Invalid contact."
+msgstr "連絡先が正しくありません。"
 
-#: osm_region_view.py:29
-msgid "Save failed."
+#: src/paperphone/application_view.py:39
+msgid "Sources"
+msgstr "情報ソース"
+
+#: src/paperphone/application_view.py:39 src/paperphone/refresh_view.py:41
+msgid "Refresh selected sources"
+msgstr "選択したデータソースを更新"
+
+#: src/paperphone/application_view.py:39 src/paperphone/refresh_view.py:45
+msgid "Cancel"
+msgstr "キャンセル"
+
+#: src/paperphone/application_view.py:40
+msgid "Sources from GNOME accounts."
+msgstr "GNOMEアカウントから取得"
+
+#: src/paperphone/application_view.py:40
+msgid "Not read yet."
+msgstr "まだ読み込んでいません。"
+
+#: src/paperphone/application_view.py:41
+msgid "OK"
+msgstr "成功"
+
+#: src/paperphone/application_view.py:41 src/paperphone/application_view.py:63
+#: src/paperphone/application_view.py:64 src/paperphone/application_view.py:65
+msgid "Failed."
+msgstr "失敗"
+
+#: src/paperphone/application_view.py:41 src/paperphone/refresh_view.py:111
+msgid "Reading selected sources…"
+msgstr "選択したデータソースを読み込んでいます…"
+
+#: src/paperphone/application_view.py:41
+msgid "Source access failed."
 msgstr "ソースにアクセスできません。"
 
-#: osm_region_view.py:30
-msgid "Map data could not be prepared."
-msgstr "地図データの準備ができませんでした。"
-
-msgid "Unexpected redirect."
-msgstr "想定外の転送でした。"
-
-#: osm_region_view.py:31
-msgid "Not confirmed."
+#: src/paperphone/application_view.py:42
+msgid ""
+"CalDAV changes were not confirmed; cached items are excluded until "
+"acknowledged."
 msgstr ""
+"CalDAVの更新を確認できなかったため、除外を確認するまでキャッシュ済みの項目は"
+"使いません。"
 
-#: osm_region_view.py:48 osm_region_view.py:85
-msgid "Select a prefecture"
-msgstr "都道府県を選択"
+#: src/paperphone/application_view.py:43
+msgid "I acknowledge exclusion of this source"
+msgstr "このソースを除外することを確認しました"
 
-#: osm_region_view.py:52 osm_region_view.py:93
-msgid "Prefecture"
-msgstr "都道府県"
+#: src/paperphone/application_view.py:43
+msgid "Selection changed. Generate again to update the PDF."
+msgstr "選択を変えました。PDFを更新するには、もう一度生成してください。"
 
-#: osm_region_view.py:53
-msgid "Check for updates"
-msgstr "ダウンロード・更新を確認"
+#: src/paperphone/application_view.py:44
+msgid "Removed unavailable selections."
+msgstr "利用できなくなった項目は選択から外しました。"
 
-#: osm_region_view.py:107 weather_location_view.py:24
-msgid "Location unavailable."
-msgstr "位置情報を取れませんでした。"
+#: src/paperphone/application_view.py:44
+msgid "Calendar"
+msgstr "Calendar"
 
-#: osm_region_view.py:183 osm_region_view.py:189
-msgid "Deleted."
-msgstr "写真を選びました。"
+#: src/paperphone/application_view.py:44
+msgid "Tasks"
+msgstr "Tasks"
 
-#: pdf_output.py:76 pdf_output.py:179
+#: src/paperphone/application_view.py:44
+msgid "Weather"
+msgstr "天気"
+
+#: src/paperphone/application_view.py:45
+msgid "Walking map"
+msgstr "徒歩地図"
+
+#: src/paperphone/application_view.py:45
+msgid "Photos"
+msgstr "Photos"
+
+#: src/paperphone/application_view.py:45
+msgid "Paper apps"
+msgstr "紙アプリ"
+
+#: src/paperphone/application_view.py:45
+msgid "PDF"
+msgstr "PDF"
+
+#: src/paperphone/application_view.py:46
+msgid "Generate booklet"
+msgstr "冊子を生成"
+
+#: src/paperphone/application_view.py:46
+msgid "Confirm unavailable source exclusions before generating."
+msgstr "利用できないソースの除外を確認してから、生成してください。"
+
+#: src/paperphone/application_view.py:47
+msgid "Generating booklet…"
+msgstr "冊子を生成しています…"
+
+#: src/paperphone/application_view.py:47
+msgid "Booklet ready. Later edits do not change this PDF."
+msgstr "冊子を生成しました。この後の変更はこのPDFに反映されません。"
+
+#: src/paperphone/application_view.py:48
+msgid "Generation failed. Your previous PDF has been kept."
+msgstr "生成に失敗しました。以前のPDFはそのまま残しています。"
+
+#: src/paperphone/application_view.py:49
+msgid "Walking map failed. The map is not included."
+msgstr "徒歩地図を生成できませんでした。地図は現在含みません。"
+
+#. 回路失敗でも他の内容は印刷する。
+#: src/paperphone/application_view.py:50
+msgid "Source selection changed during refresh; old results were ignored."
+msgstr "更新中にソースの選択が変わったため、古い結果は捨てました。"
+
+#: src/paperphone/application_view.py:51 src/paperphone/refresh_view.py:126
+msgid "Refresh cancelled."
+msgstr "更新をキャンセルしました。"
+
+#: src/paperphone/application_view.py:51
+msgid "No events for today."
+msgstr "今日の予定はありません。"
+
+#: src/paperphone/application_view.py:52
+msgid "Photo selection is still in progress."
+msgstr "写真の選択と読み込みがまだ終わっていません。"
+
+#: src/paperphone/application_view.py:53 src/paperphone/osm_region_view.py:56
+msgid "Delete stored map data"
+msgstr "地図データを削除"
+
+#: src/paperphone/application_view.py:53
+msgid "Map data deleted."
+msgstr "地図データを削除しました。"
+
+#: src/paperphone/application_view.py:53
+msgid "Map data could not be deleted."
+msgstr "ローカルの道路データを読み込めません。"
+
+#: src/paperphone/application_view.py:54
+msgid "Settings could not be saved."
+msgstr "更新を開始できませんでした。"
+
+#: src/paperphone/application_view.py:55
+msgid "photo: excluded"
+msgstr "写真: 掲載しない"
+
+#: src/paperphone/application_view.py:55
+msgid "weather: excluded"
+msgstr "天気: 掲載しない"
+
+#: src/paperphone/application_view.py:55
+msgid "map: excluded"
+msgstr "地図: 掲載しない"
+
+#: src/paperphone/application_view.py:55
+#, python-brace-format
+msgid "{source}: excluded"
+msgstr "{source}: 掲載しない"
+
+#: src/paperphone/application_view.py:56
+#, python-brace-format
+msgid "Map failure: {reason}"
+msgstr "地図の失敗: {reason}"
+
+#: src/paperphone/application_view.py:56
+msgid "Task List"
+msgstr "タスクリスト"
+
+#: src/paperphone/application_view.py:56
+msgid "Address Book"
+msgstr "アドレス帳"
+
+#: src/paperphone/application_view.py:61
+msgid "OK."
+msgstr "OK"
+
+#: src/paperphone/application_view.py:62
+msgid "Not registered."
+msgstr "ソースが登録されていません。"
+
+#: src/paperphone/application_services.py:43
+msgid "Choose both departure and destination."
+msgstr "出発地と目的地の両方を選んでください。"
+
+#: src/paperphone/application_services.py:44
+msgid "The map index and selected extract do not match."
+msgstr "地名索引と、選択中の抽出版が一致しません。"
+
+#: src/paperphone/application_services.py:45
+msgid "An endpoint is outside the selected prefecture."
+msgstr "出発地または目的地が選択した都道府県の範囲外です。"
+
+#: src/paperphone/application_services.py:46
+msgid "The walking road graph is disconnected between these endpoints."
+msgstr "探索範囲内で、出発地と目的地の間の歩行者グラフがつながっていません。"
+
+#: src/paperphone/application_services.py:47
+msgid "No walking road is close enough to an endpoint."
+msgstr "出発地または目的地の近くに、接続できる歩行者用の道路がありません。"
+
+#: src/paperphone/application_services.py:48
+msgid "No walking roads are available in this area."
+msgstr "この範囲内に歩行者用の道路がありません。"
+
+#: src/paperphone/application_services.py:49
+msgid "An endpoint is outside the routing area."
+msgstr "出発地または目的地が経路の探索範囲外です。"
+
+#: src/paperphone/application_services.py:50
+msgid "The map content does not fit the printable page."
+msgstr "地図の内容が印刷ページに収まりません。"
+
+#: src/paperphone/application_services.py:51
+msgid "The walking route is invalid."
+msgstr "徒歩経路のデータが不正です。"
+
+#: src/paperphone/application_services.py:52
+msgid "The walking endpoints are invalid."
+msgstr "徒歩経路の出発地または目的地が不正です。"
+
+#: src/paperphone/application_services.py:53
+msgid "The routing area is invalid."
+msgstr "経路の探索範囲が不正です。"
+
+#: src/paperphone/application_services.py:54
+msgid "The local road data could not be read."
+msgstr "ローカルの道路データを読み込めません。"
+
+#: src/paperphone/application_services.py:55
+msgid "The local map source is unavailable."
+msgstr "ローカルの地図データを利用できません。"
+
+#: src/paperphone/application_services.py:56
+#: src/paperphone/application_services.py:57
+msgid "The local walking route is unavailable."
+msgstr "ローカルの徒歩経路を利用できません。"
+
+#: src/paperphone/application_services.py:58
+msgid "The booklet could not be rendered."
+msgstr "冊子を描画できません。"
+
+#: src/paperphone/application_services.py:108
+#, python-brace-format
+msgid "Panel {panel}: some text was shortened ({count})."
+msgstr "区画{panel}: 文章を省略しました（{count}件）。"
+
+#: src/paperphone/application_services.py:109
+#, python-brace-format
+msgid "Panel {panel}: items did not fit ({count})."
+msgstr "区画{panel}: 掲載できない項目があります（{count}件）。"
+
+#: src/paperphone/application_services.py:110
+#, python-brace-format
+msgid "Panel {panel}: an invalid date could not be printed ({count})."
+msgstr "区画{panel}: 不正な日付を掲載できませんでした（{count}件）。"
+
+#: src/paperphone/application_services.py:111
+#, python-brace-format
+msgid "Panel {panel}: weather data could not be printed ({count})."
+msgstr "区画{panel}: 天気データを掲載できませんでした（{count}件）。"
+
+#: src/paperphone/application_services.py:112
+#, python-brace-format
+msgid "Map: a location name was shortened ({count})."
+msgstr "地図: 地点名を省略しました（{count}件）。"
+
+#: src/paperphone/application_services.py:114
+msgid "Some booklet content could not be printed."
+msgstr "冊子の一部を掲載できませんでした。"
+
+#: src/paperphone/pdf_output.py:76 src/paperphone/pdf_output.py:179
 msgid "Generate a booklet to preview, save or print."
 msgstr "冊子を生成すると、プレビュー・保存・印刷が使えます。"
 
-#: pdf_output.py:85 pdf_output.py:142
+#: src/paperphone/pdf_output.py:85 src/paperphone/pdf_output.py:142
 msgid "PDF preview"
 msgstr "PDFプレビュー"
 
-#: pdf_output.py:86
+#: src/paperphone/pdf_output.py:86
 msgid "Previous page"
 msgstr "前のページ"
 
-#: pdf_output.py:87
+#: src/paperphone/pdf_output.py:87
 msgid "Next page"
 msgstr "次のページ"
 
-#: pdf_output.py:94
+#: src/paperphone/pdf_output.py:94
 msgid "Save PDF…"
 msgstr "PDFを保存…"
 
-#: pdf_output.py:95
+#: src/paperphone/pdf_output.py:95
 msgid "Print…"
 msgstr "印刷…"
 
-#: pdf_output.py:102
-msgid "Print on A4 paper in landscape at 100% (Actual Size), one PDF page per sheet. Disable Fit to Page."
-msgstr "A4用紙・横向き・100%（実際のサイズ）で、PDFの1ページを用紙1枚に印刷してください。「用紙に合わせる」は無効にします。"
+#: src/paperphone/pdf_output.py:102
+msgid ""
+"Print on A4 paper in landscape at 100% (Actual Size), one PDF page per "
+"sheet. Disable Fit to Page."
+msgstr ""
+"A4用紙・横向き・100%（実際のサイズ）で、PDFの1ページを用紙1枚に印刷してくださ"
+"い。「用紙に合わせる」は無効にします。"
 
-#: pdf_output.py:105
+#: src/paperphone/pdf_output.py:105
 msgid "Folding instructions"
 msgstr "折り方の説明"
 
-#: pdf_output.py:107
-msgid "If the optional map page is printed on the reverse, lay it map-side up and fold in half so the two circles touch. Fold in half again so the squares touch, then fold in half one last time. Without a map page, use the main-page fold marks and check the cover orientation. If using the card guides, carefully cut along the dotted diagonal lines to hold a contactless card."
-msgstr "地図ページを裏面に印刷した場合は、地図の面を上にして、ページ下の2つの丸が重なるように半分に折ります。四角が重なるようにさらに半分に折り、最後にもう一度半分に折ります。地図ページがなければ主ページの折り目印を使い、表紙の向きを確かめます。カード用ガイドを使うときは、点線の斜線に沿って静かに切り込みを入れ、非接触カードを挟みます。"
+#: src/paperphone/pdf_output.py:107
+msgid ""
+"If the optional map page is printed on the reverse, lay it map-side up and "
+"fold in half so the two circles touch. Fold in half again so the squares "
+"touch, then fold in half one last time. Without a map page, use the main-"
+"page fold marks and check the cover orientation. If using the card guides, "
+"carefully cut along the dotted diagonal lines to hold a contactless card."
+msgstr ""
+"地図ページを裏面に印刷した場合は、地図の面を上にして、ページ下の2つの丸が重な"
+"るように半分に折ります。四角が重なるようにさらに半分に折り、最後にもう一度半"
+"分に折ります。地図ページがなければ主ページの折り目印を使い、表紙の向きを確か"
+"めます。カード用ガイドを使うときは、点線の斜線に沿って静かに切り込みを入れ、"
+"非接触カードを挟みます。"
 
-#: pdf_output.py:162
+#: src/paperphone/pdf_output.py:162
 msgid "PDF ready. Preview, save and print use this same snapshot."
 msgstr "PDFを生成しました。プレビュー・保存・印刷では、この同じPDFを使います。"
 
-#: pdf_output.py:188
+#: src/paperphone/pdf_output.py:188
 #, python-brace-format
 msgid "Page {page} of {pages}"
 msgstr "{page} / {pages} ページ"
 
-#: pdf_output.py:189
+#: src/paperphone/pdf_output.py:189
 msgid "No PDF"
 msgstr "PDF未生成"
 
-#: pdf_output.py:236 pdf_output.py:244
+#: src/paperphone/pdf_output.py:236 src/paperphone/pdf_output.py:244
 msgid "Save cancelled. PDF unchanged."
 msgstr "保存を取り消しました。PDFはそのままです。"
 
-#: pdf_output.py:237 pdf_output.py:251 pdf_output.py:265
+#: src/paperphone/pdf_output.py:237 src/paperphone/pdf_output.py:251
+#: src/paperphone/pdf_output.py:265
 msgid "Could not save PDF. Existing files and the PDF snapshot are unchanged."
-msgstr "PDFを保存できませんでした。既存のファイルと生成済みのPDFはそのままです。"
+msgstr ""
+"PDFを保存できませんでした。既存のファイルと生成済みのPDFはそのままです。"
 
-#: pdf_output.py:246
+#: src/paperphone/pdf_output.py:246
 msgid "Choose a local file to save the PDF. The PDF snapshot is unchanged."
-msgstr "PDFの保存先はローカルファイルを選んでください。生成済みのPDFは変更していません。"
+msgstr ""
+"PDFの保存先はローカルファイルを選んでください。生成済みのPDFは変更していませ"
+"ん。"
 
-#: pdf_output.py:253
+#: src/paperphone/pdf_output.py:253
 msgid "PDF saved."
 msgstr "PDFを保存しました。"
 
-#: pdf_output.py:259
+#: src/paperphone/pdf_output.py:259
 msgid "Save PDF"
 msgstr "PDFの保存"
 
-#: pdf_output.py:301
+#: src/paperphone/pdf_output.py:301
 msgid "Could not print PDF. The PDF snapshot is unchanged."
 msgstr "PDFを印刷できませんでした。生成済みのPDFは変更していません。"
 
-#: pdf_output.py:303
+#: src/paperphone/pdf_output.py:303
 msgid "Print cancelled. PDF unchanged."
 msgstr "印刷を取り消しました。PDFはそのままです。"
 
-#: pdf_output.py:305
+#: src/paperphone/pdf_output.py:305
 msgid "Print operation accepted. Physical printing is not confirmed."
 msgstr "印刷操作を受け付けました。実際の印刷が済んだかはらわかりません。"
 
-#: place_selection.py:32
+#: src/paperphone/osm_region_view.py:22 src/paperphone/osm_region_view.py:23
+msgid "Download failed."
+msgstr "ダウンロードに失敗しました。"
+
+#: src/paperphone/osm_region_view.py:24
+msgid "Extract unavailable."
+msgstr "天気を取得しました。"
+
+#: src/paperphone/osm_region_view.py:25
+msgid "Access denied."
+msgstr "拒否されました。"
+
+#: src/paperphone/osm_region_view.py:26
+msgid "Rate limited."
+msgstr "要求が絞られています。"
+
+#: src/paperphone/osm_region_view.py:27
+msgid "Wait before retrying."
+msgstr "少し待ってからもう一度試してください。"
+
+#: src/paperphone/osm_region_view.py:28
+msgid "Downloaded data is invalid."
+msgstr "経路の探索範囲が不正です。"
+
+#: src/paperphone/osm_region_view.py:29
+msgid "Saved data is damaged."
+msgstr "保存してある地図データが壊れています。"
+
+#: src/paperphone/osm_region_view.py:30
+msgid "Save failed."
+msgstr "ソースにアクセスできません。"
+
+#: src/paperphone/osm_region_view.py:31
+msgid "Unexpected redirect."
+msgstr "想定外の転送でした。"
+
+#: src/paperphone/osm_region_view.py:32
+msgid "Not confirmed."
+msgstr ""
+
+#: src/paperphone/osm_region_view.py:33
+msgid "Map data could not be prepared."
+msgstr "地図データの準備ができませんでした。"
+
+#: src/paperphone/osm_region_view.py:50 src/paperphone/osm_region_view.py:87
+msgid "Select a prefecture"
+msgstr "都道府県を選択"
+
+#: src/paperphone/osm_region_view.py:54 src/paperphone/osm_region_view.py:95
+msgid "Prefecture"
+msgstr "都道府県"
+
+#: src/paperphone/osm_region_view.py:55
+msgid "Check for updates"
+msgstr "ダウンロード・更新を確認"
+
+#: src/paperphone/osm_region_view.py:109
+#: src/paperphone/weather_location_view.py:25
+msgid "Location unavailable."
+msgstr "位置情報を取れませんでした。"
+
+#: src/paperphone/osm_region_view.py:191 src/paperphone/osm_region_view.py:197
+msgid "Deleted."
+msgstr "写真を選びました。"
+
+#: src/paperphone/place_selection.py:34
 msgid "Use current location as departure"
 msgstr "現在地を出発地にする"
 
-#: place_selection.py:39
+#: src/paperphone/place_selection.py:43
 msgid "Departure"
 msgstr "出発地"
 
-#: place_selection.py:39
+#: src/paperphone/place_selection.py:43
 msgid "Destination"
 msgstr "目的地"
 
-#: place_selection.py:49 place_selection.py:114 place_selection.py:156
+#: src/paperphone/place_selection.py:53 src/paperphone/place_selection.py:118
+#: src/paperphone/place_selection.py:163
 msgid "No place selected."
 msgstr "場所は選んでいません。"
 
-#: place_selection.py:117 place_selection.py:180
+#: src/paperphone/place_selection.py:121 src/paperphone/place_selection.py:187
 msgid "Search stays on this device."
 msgstr "検索はこの端末の内部でだけ行います。"
 
-#: place_selection.py:128
+#: src/paperphone/place_selection.py:132
 msgid "Building the local place index…"
 msgstr "地名索引を作るための情報を調べています…"
 
-#: place_selection.py:147
+#: src/paperphone/place_selection.py:154
 msgid "Place index unavailable."
 msgstr "索引が使えません。"
 
-#: place_selection.py:163
+#: src/paperphone/place_selection.py:170
 msgid "Current location"
 msgstr "現在地"
 
-#: place_selection.py:168
-msgid "Current location is outside the selected prefecture. Search for a departure."
+#: src/paperphone/place_selection.py:175
+msgid ""
+"Current location is outside the selected prefecture. Search for a departure."
 msgstr "現在地は選択した都道府県の外にあります。出発地を検索してください。"
 
-#: place_selection.py:200
+#: src/paperphone/place_selection.py:207
 msgid "Enter a place name."
 msgstr "場所の名前を入力してください。"
 
-#: place_selection.py:203
+#: src/paperphone/place_selection.py:210
 msgid "Searching local places…"
 msgstr "ローカルの場所を検索しています…"
 
-#: place_selection.py:225
+#: src/paperphone/place_selection.py:232
 msgid "Search failed."
 msgstr "ソースにアクセスできません。"
 
-#: place_selection.py:226
-msgid "Choose a search result."
-msgstr "検索結果から選んでください。"
-
-#: place_selection.py:226
+#: src/paperphone/place_selection.py:233
 msgid "No local places found."
 msgstr "一致する場所が見つかりません。"
 
-#: place_selection.py:230
+#: src/paperphone/place_selection.py:237
 msgid "This place is outside the selected prefecture."
 msgstr "この場所は選択した都道府県の範囲外です。"
 
-#: refresh_view.py:54
+#: src/paperphone/refresh_view.py:54
 msgid "Not refreshed yet."
 msgstr "まだ更新していません。"
 
-#: refresh_view.py:94
+#: src/paperphone/refresh_view.py:94
 msgid "Refresh could not be started."
 msgstr "更新を開始できませんでした。"
 
-#: refresh_view.py:128
+#: src/paperphone/refresh_view.py:128
 msgid "CalDAV changes were not confirmed. Cached tasks may be shown."
-msgstr "CalDAVの更新はまだ確認できていないため、キャッシュ済みのタスクが表示されることがあります。"
+msgstr ""
+"CalDAVの更新はまだ確認できていないため、キャッシュ済みのタスクが表示されるこ"
+"とがあります。"
 
-#: refresh_view.py:130
+#: src/paperphone/refresh_view.py:130
 msgid "Some sources could not be read."
 msgstr "読み取れないデータソースがありました。"
 
-#: refresh_view.py:132
+#: src/paperphone/refresh_view.py:132
 msgid "Refresh complete."
 msgstr "更新が完了しました。"
 
-#: resources.py:37
+#: src/paperphone/resources.py:37
 msgid "Conversion Charts"
 msgstr "換算表"
 
-#: resources.py:38
+#: src/paperphone/resources.py:38
 msgid "Knots"
 msgstr "結び方"
 
-#: resources.py:39
+#: src/paperphone/resources.py:39
 msgid "Italian Phrasebook"
 msgstr "イタリア語会話"
 
-#: resources.py:40
+#: src/paperphone/resources.py:40
 msgid "Sign Language"
 msgstr "手話"
 
-#: resources.py:41
+#: src/paperphone/resources.py:41
 msgid "Multiplication Table"
 msgstr "九九表"
 
-#: resources.py:42
+#: src/paperphone/resources.py:42
 msgid "Recipe"
 msgstr "レシピ"
 
-#: resources.py:43
+#: src/paperphone/resources.py:43
 msgid "Origami Pigeon"
 msgstr "折り紙の鳩"
 
-#: resources.py:44
+#: src/paperphone/resources.py:44
 msgid "Sudoku"
 msgstr "数独"
 
-#: resources.py:45
+#: src/paperphone/resources.py:45
 msgid "Maze"
 msgstr "迷路"
 
-#: resources.py:46
+#: src/paperphone/resources.py:46
 msgid "Word of the Day"
 msgstr "今日の言葉"
 
-#: resources.py:47
+#: src/paperphone/resources.py:47
 msgid "Anagram"
 msgstr "アナグラム"
 
-#: resources.py:48
+#: src/paperphone/resources.py:48
 msgid "Riddle"
 msgstr "なぞなぞ"
 
-#: resources.py:49
+#: src/paperphone/resources.py:49
 msgid "Typography"
 msgstr "タイポグラフィ"
 
-#: todo_selection.py:23
+#: src/paperphone/todo_selection.py:23
 msgid "Upcoming"
 msgstr "今後"
 
-#: todo_selection.py:24
+#: src/paperphone/todo_selection.py:24
 msgid "No due date"
 msgstr "期限なし"
 
-#: todo_selection.py:60 todo_selection.py:79
+#: src/paperphone/todo_selection.py:60 src/paperphone/todo_selection.py:79
 msgid "No tasks in this category."
 msgstr "この分類では、タスクはありません。"
 
-#: todo_selection.py:83 todo_selection.py:188
+#: src/paperphone/todo_selection.py:83 src/paperphone/todo_selection.py:188
 msgid "Overdue"
 msgstr "期限切れ"
 
-#: todo_selection.py:86 todo_selection.py:167
+#: src/paperphone/todo_selection.py:86 src/paperphone/todo_selection.py:167
 msgid "Untitled task"
 msgstr "無題のタスク"
 
-#: todo_selection.py:207
+#: src/paperphone/todo_selection.py:207
 #, python-brace-format
 msgid "Starts: {when}"
 msgstr "開始: {when}"
 
-#: weather_location_view.py:19
+#: src/paperphone/weather_location_view.py:20
 msgid "Requesting location permission…"
 msgstr "位置情報の許可を要求しています…"
 
-#: weather_location_view.py:20
+#: src/paperphone/weather_location_view.py:21
 msgid "Fetching weather…"
 msgstr "天気を取得しています…"
 
-#: weather_location_view.py:22
+#: src/paperphone/weather_location_view.py:23
 msgid "Location denied."
 msgstr "位置情報は断られました。"
 
-#: weather_location_view.py:23
+#: src/paperphone/weather_location_view.py:24
 msgid "Location timed out."
 msgstr "位置情報が時間切れになりました。"
 
-#: weather_location_view.py:25
+#: src/paperphone/weather_location_view.py:26
 msgid "Location service returned unusable coordinates. Nothing was sent."
 msgstr "位置情報サービスから、使えない座標が返りました。何も送信していません。"
 
-#: weather_location_view.py:26
+#: src/paperphone/weather_location_view.py:27
 msgid "Weather fetch failed."
 msgstr "天気を取得しました。"
 
-#: weather_location_view.py:44
+#: src/paperphone/weather_location_view.py:30
+msgid "No forecast left for today."
+msgstr "今日の天気はもうありません。"
+
+#: src/paperphone/weather_location_view.py:48
 msgid "Fetch weather"
 msgstr "天気を取得"
 
-#: weather_rendering.py:25
-#, python-brace-format
-msgid "At {when}: {temperature} °C"
-msgstr "{when}時点: {temperature} °C"
+#: src/paperphone/weather_sheet.py:43
+msgid "Clear sky"
+msgstr "快晴"
 
-#: weather_rendering.py:27
-#, python-brace-format
-msgid "Weather period: {start}–{end}"
-msgstr "予報の対象時刻: {start}–{end}"
+#: src/paperphone/weather_sheet.py:44
+msgid "Fair"
+msgstr "晴れ"
 
-#: weather_rendering.py:29 weather_sheet.py:120
+#: src/paperphone/weather_sheet.py:45
+msgid "Partly cloudy"
+msgstr "晴時々曇"
+
+#: src/paperphone/weather_sheet.py:46
+msgid "Cloudy"
+msgstr "曇り"
+
+#: src/paperphone/weather_sheet.py:47
+msgid "Fog"
+msgstr "霧"
+
+#: src/paperphone/weather_sheet.py:48
+msgid "Light rain"
+msgstr "小雨"
+
+#: src/paperphone/weather_sheet.py:49
+msgid "Rain"
+msgstr "雨"
+
+#: src/paperphone/weather_sheet.py:50
+msgid "Heavy rain"
+msgstr "大雨"
+
+#: src/paperphone/weather_sheet.py:51
+msgid "Light rain and thunder"
+msgstr "雷を伴う小雨"
+
+#: src/paperphone/weather_sheet.py:52
+msgid "Rain and thunder"
+msgstr "雷を伴う雨"
+
+#: src/paperphone/weather_sheet.py:53
+msgid "Heavy rain and thunder"
+msgstr "雷を伴う大雨"
+
+#: src/paperphone/weather_sheet.py:54
+msgid "Light sleet"
+msgstr "弱いみぞれ"
+
+#: src/paperphone/weather_sheet.py:55
+msgid "Sleet"
+msgstr "みぞれ"
+
+#: src/paperphone/weather_sheet.py:56
+msgid "Heavy sleet"
+msgstr "強いみぞれ"
+
+#: src/paperphone/weather_sheet.py:57
+msgid "Light sleet and thunder"
+msgstr "雷を伴う弱いみぞれ"
+
+#: src/paperphone/weather_sheet.py:58
+msgid "Sleet and thunder"
+msgstr "雷を伴うみぞれ"
+
+#: src/paperphone/weather_sheet.py:59
+msgid "Heavy sleet and thunder"
+msgstr "雷を伴う強いみぞれ"
+
+#: src/paperphone/weather_sheet.py:60
+msgid "Light snow"
+msgstr "弱い雪"
+
+#: src/paperphone/weather_sheet.py:61
+msgid "Snow"
+msgstr "雪"
+
+#: src/paperphone/weather_sheet.py:62
+msgid "Heavy snow"
+msgstr "強い雪"
+
+#: src/paperphone/weather_sheet.py:63
+msgid "Light snow and thunder"
+msgstr "雷を伴う弱い雪"
+
+#: src/paperphone/weather_sheet.py:64
+msgid "Snow and thunder"
+msgstr "雷を伴う雪"
+
+#: src/paperphone/weather_sheet.py:65
+msgid "Heavy snow and thunder"
+msgstr "雷を伴う強い雪"
+
+#: src/paperphone/weather_sheet.py:66
+msgid "Light rain showers"
+msgstr "弱いにわか雨"
+
+#: src/paperphone/weather_sheet.py:67
+msgid "Rain showers"
+msgstr "にわか雨"
+
+#: src/paperphone/weather_sheet.py:68
+msgid "Heavy rain showers"
+msgstr "強いにわか雨"
+
+#: src/paperphone/weather_sheet.py:69
+msgid "Light rain showers and thunder"
+msgstr "雷を伴う弱いにわか雨"
+
+#: src/paperphone/weather_sheet.py:70
+msgid "Rain showers and thunder"
+msgstr "雷を伴うにわか雨"
+
+#: src/paperphone/weather_sheet.py:71
+msgid "Heavy rain showers and thunder"
+msgstr "雷を伴う強いにわか雨"
+
+#: src/paperphone/weather_sheet.py:72
+msgid "Light sleet showers"
+msgstr "弱いにわかみぞれ"
+
+#: src/paperphone/weather_sheet.py:73
+msgid "Sleet showers"
+msgstr "にわかみぞれ"
+
+#: src/paperphone/weather_sheet.py:74
+msgid "Heavy sleet showers"
+msgstr "強いにわかみぞれ"
+
+#: src/paperphone/weather_sheet.py:75
+msgid "Light sleet showers and thunder"
+msgstr "雷を伴う弱いにわかみぞれ"
+
+#: src/paperphone/weather_sheet.py:76
+msgid "Sleet showers and thunder"
+msgstr "雷を伴うにわかみぞれ"
+
+#: src/paperphone/weather_sheet.py:77
+msgid "Heavy sleet showers and thunder"
+msgstr "雷を伴う強いにわかみぞれ"
+
+#: src/paperphone/weather_sheet.py:78
+msgid "Light snow showers"
+msgstr "弱いにわか雪"
+
+#: src/paperphone/weather_sheet.py:79
+msgid "Snow showers"
+msgstr "にわか雪"
+
+#: src/paperphone/weather_sheet.py:80
+msgid "Heavy snow showers"
+msgstr "強いにわか雪"
+
+#: src/paperphone/weather_sheet.py:81
+msgid "Light snow showers and thunder"
+msgstr "雷を伴う弱いにわか雪"
+
+#: src/paperphone/weather_sheet.py:82
+msgid "Snow showers and thunder"
+msgstr "雷を伴うにわか雪"
+
+#: src/paperphone/weather_sheet.py:83
+msgid "Heavy snow showers and thunder"
+msgstr "雷を伴う強いにわか雪"
+
+#: src/paperphone/weather_sheet.py:102
+msgid "MORNING"
+msgstr "朝"
+
+#: src/paperphone/weather_sheet.py:104
+msgid "AFTERNOON"
+msgstr "昼"
+
+#: src/paperphone/weather_sheet.py:105
+msgid "EVENING"
+msgstr "夕方"
+
+#: src/paperphone/weather_sheet.py:194
+#, python-brace-format
+msgid "{t} °C"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:195 src/paperphone/weather_rendering.py:30
 msgid "Unknown weather condition"
 msgstr "不明な天気"
 
-#: weather_sheet.py:121
-#, fuzzy, python-brace-format
-msgid "At {when}: {temperature} °C; {period} to {end}, {condition}"
-msgstr "{when}時点: {temperature} °C"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#: src/paperphone/weather_sheet.py:196
+#, python-brace-format
+msgid "({start}–{end})"
+msgstr "（{start}–{end}）"
+
+#: src/paperphone/weather_rendering.py:28
+#, python-brace-format
+msgid "{t} °C ({start}–{end})"
+msgstr "{t} °C（{start}–{end}）"
+
+#. xgettext 0.21はf-string内部の呼出しを抽出できない。現行ソースにあるmsgidで、このファイルに手動維持する。
+msgid "All day"
+msgstr "終日"
+
+#. xgettext 0.21はf-string内部の呼出しを抽出できない。現行ソースにあるmsgidで、このファイルに手動維持する。
+msgid "Credentials needed."
+msgstr "パスワードが必要"
+
+#. ソース外部の契約: tests/test_smoke.pyがこのmsgidの原文と日本語訳を検定する。
 msgid "Create, preview, save, and print your paper booklet."
 msgstr "紙の冊子を作って、プレビュー・保存・印刷します。"
-
-
-msgid "GNOME startup foundation"
-msgstr "GNOME版の起動に必要な基本"
-
-
-msgid "Start preparing"
-msgstr "用意を始める"
-
-
-msgid "Startup check complete."
-msgstr "起動時の確認ができました。"
-
-
-msgid ""
-"Printing maps and directions\n"
-"requires a printer which supports\n"
-"double sided printing"
-msgstr ""
-"地図と道順を印刷するには、両面印刷に\n"
-"対応したプリンターが必要です。"
-
-
-msgid ""
-"Choose up to 7 contacts to print\n"
-"on your Paper Phone"
-msgstr "印刷する連絡先を7件まで選択できます。"
-
-
-msgid ""
-"Choose the calendars you want\n"
-"to print to your Paper Phone"
-msgstr ""
-"Paper Phoneに印刷したいカレンダーを\n"
-"選択します。"
-
-
-msgid ""
-"Choose the task lists you want\n"
-"to print to your Paper Phone"
-msgstr "Paper Phoneに印刷したいタスクリストを選択します。"
-
-
-msgid ""
-"An empty space will be added to your\n"
-"Paper Phone to capture\n"
-"thoughts and ideas"
-msgstr ""
-"あなたのPaper Phoneに\n"
-"空きスペースが追加され、考えや\n"
-"アイデアを記録することができます。"
-
-
-msgid ""
-"Add a screenshot or\n"
-"picture to your Paper Phone"
-msgstr ""
-"スクリーンショットまたは写真を\n"
-"Paper Phoneに追加します"
-
-
-msgid ""
-"Cut marks will be added to\n"
-"your Paper Phone for you\n"
-"to store a contactless card"
-msgstr ""
-"Paper Phoneにカットマークが\n"
-"追加されます。"
-
-
-msgid ""
-"Choose a Paper App to print\n"
-"to your Paper Phone"
-msgstr ""
-"Paper Appを選んで\n"
-"Paper Phoneに追加します。"
-
-
-msgid ""
-"Print maps and directions onto\n"
-"the back of your Paper Phone"
-msgstr "地図と道順を印刷します。"
-
-
-msgid ""
-"Tap to select the things you want\n"
-"to print to your Paper Phone"
-msgstr ""
-"タップして、Paper Phoneに印刷\n"
-"したいものを選択します。"
-
-
-msgid ""
-"To fold your phone, lay the page map\n"
-"side up and fold it in half so the two\n"
-"\n"
-"little circles at the bottom of the page\n"
-"touch\n"
-"\n"
-"Then fold in half again so the squares\n"
-"are touching\n"
-"\n"
-"Then fold\n"
-"in half one last time\n"
-"\n"
-"If you would like to keep a contactless card\n"
-"inside your Paper Phone then please carefully\n"
-"cut along the dotted diagonal lines."
-msgstr ""
-"折り方は、ページマップを上にして、\n"
-"ページ下部の2つの丸が触れるように\n"
-"半分に折り、四角が触れるように\n"
-"もう一度半分に折ってから、\n"
-"最後にもう一度半分に折ってください。"
-
-
-msgid ""
-"Please choose the Google\n"
-"account you wish to use"
-msgstr ""
-"使用するGoogleアカウントを\n"
-"選択してください。"
-
-
-msgid ""
-"This experiment prints a\n"
-"little paper phone with the\n"
-"most important information\n"
-"you'll need for the day"
-msgstr ""
-"この実験では、あなたの一日で\n"
-"一番大事なことを、\n"
-"小さな紙の電話に印刷します。"
-
-
-msgid ""
-"Just choose the information\n"
-"you would like to include on\n"
-"your Paper Phone and\n"
-"\n"
-"hit print"
-msgstr ""
-"Paper Phoneに載せたい情報を\n"
-"選んで、printを押すだけ。"
-
-
-msgid ""
-"A printable Paper Phone which\n"
-"helps you take a break away\n"
-"from your digital world"
-msgstr ""
-"デジタルの世界から離れて\n"
-"一息つくのに役立つ、\n"
-"印刷可能なPaper Phone。"
-
-
-msgid ""
-"%s\n"
-"\n"
-"You can do this in the settings.\n"
-"\n"
-"Would you like to do this now?"
-msgstr ""
-"%s\n"
-"\n"
-"これは設定からできます。\n"
-"\n"
-"今すぐやりますか？"

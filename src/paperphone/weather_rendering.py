@@ -8,25 +8,26 @@ gi.require_version("Pango", "1.0")
 gi.require_version("PangoCairo", "1.0")
 from gi.repository import Pango, PangoCairo
 
-from .weather_sheet import WeatherSheet, weather_lines, known_symbol
+from .weather_sheet import (WeatherSheet, weather_lines, known_symbol,
+                            symbol_description, time_of_day)
 from .i18n import gettext_for
 from .printing_fonts import WORK_SANS, register_printing_fonts
 
+_ = gettext_for()
+
 
 def compact_weather_lines(sheet: WeatherSheet) -> tuple[str, ...]:
-    """紙面用の短い表示。時刻だけを扱い、日付や機械向け列を載せない。"""
-    _ = gettext_for()
+    """紙面用の短い行。時間帯見出し・罫線・アイコンは組版が担当する。"""
     lines = []
     for row in sheet.rows:
         if not row.available:
             # 過ぎた時刻や欠落した枠は印字しない。
             continue
-        start = row.actual_at
-        lines.append(_("At {when}: {temperature} °C").format(
-            when=start.strftime("%H:%M"), temperature=f"{row.temperature_c:g}"))
-        lines.append(_("Weather period: {start}–{end}").format(
-            start=start.strftime("%H:%M"), end=row.period_end.strftime("%H:%M")))
-        lines.append(row.symbol if row.symbol_known else _("Unknown weather condition"))
+        description = symbol_description(row.symbol)
+        start = row.actual_at.strftime("%H:%M")
+        lines.append(_("{t} °C ({start}–{end})").format(
+            t=f"{row.temperature_c:g}", start=start, end=row.period_end.strftime("%H:%M")))
+        lines.append(_(description) if description else _("Unknown weather condition"))
     return tuple(lines)
 
 
@@ -99,35 +100,57 @@ def draw_weather_glyph(context, code: str | None, *, x: float, y: float) -> bool
     return True
 
 
+def _fits(layout, available):
+    natural = layout.get_size()[1] / Pango.SCALE
+    if available < 2:
+        return None
+    if natural > available:
+        layout.set_ellipsize(Pango.EllipsizeMode.END)
+        layout.set_height(round(available * Pango.SCALE))
+    return min(natural, available)
+
+
 def _draw_compact_body(context, sheet, *, x, y, width, height):
     lines = compact_weather_lines(sheet)
-    cursor = 1
-    blocks = [(lines[0], 7.31, None, 12)]
-    for row in sheet.rows:
-        count = 3 if row.available else 1
-        blocks.append(("\n".join(lines[cursor:cursor + count]), 7.31,
-                       row.symbol if row.available and row.symbol_known else None, 42))
-        cursor += count
-    blocks.append(("\n".join(lines[cursor:]), 6.47, None, height))
+    cursor = 0
     yy = y
     overflow = False
-    for text, size, code, limit in blocks:
-        left = 26 if code and known_symbol(code) else 0
-        layout = _layout(context, text, width - left, size)
-        natural = layout.get_size()[1] / Pango.SCALE
-        available = min(limit, y + height - yy)
-        if available < size:
+    for row in sheet.rows:
+        if not row.available:
+            continue
+        heading = time_of_day(row.actual_at)
+        heading_layout = _layout(context, _(heading) if heading else "", width, 7.31)
+        used = _fits(heading_layout, y + height - yy)
+        if used is None:
             overflow = True
             break
-        if natural > available:
-            overflow = True
-            layout.set_ellipsize(Pango.EllipsizeMode.END)
-            layout.set_height(round(available * Pango.SCALE))
+        if heading:
+            context.move_to(x, yy)
+            PangoCairo.show_layout(context, heading_layout)
+            yy += used + 2
+            context.set_line_width(.5)
+            context.move_to(x, yy)
+            context.line_to(x + width, yy)
+            context.stroke()
+            yy += 3
+        block_height = min(42, y + height - yy)
+        left = 26 if row.symbol_known else 0
         if left:
-            draw_weather_glyph(context, code, x=x, y=yy + 2)
-        context.move_to(x + left, yy)
-        PangoCairo.show_layout(context, layout)
-        yy += min(natural, available) + 3
+            draw_weather_glyph(context, row.symbol, x=x, y=yy + 2)
+        for line, size in ((lines[cursor], 8.5), (lines[cursor + 1], 6)):
+            layout = _layout(context, line, width - left, size)
+            used = _fits(layout, block_height)
+            if used is None:
+                overflow = True
+                break
+            context.move_to(x + left, yy)
+            PangoCairo.show_layout(context, layout)
+            yy += used + 1
+            block_height -= used + 1
+        if overflow:
+            break
+        cursor += 2
+        yy += 4
     return overflow
 
 

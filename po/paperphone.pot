@@ -3,34 +3,673 @@
 # This file is distributed under the same license as the paperphone package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#. 空文字列を _() に渡すとカタログのヘッダーが返るので、素の空にしておく。
+#: src/paperphone/weather_location_view.py:46
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: paperphone\n"
+"Project-Id-Version: paperphone 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-07 16:35+0900\n"
+"POT-Creation-Date: 2026-11-09 04:01+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/paperphone/main.py:58
-msgid "Create, preview, save, and print your paper booklet."
+#: src/paperphone/booklet_content.py:123 src/paperphone/todo_selection.py:22
+msgid "Today"
 msgstr ""
 
-#: src/paperphone/main.py:63
-msgid "GNOME startup foundation"
+#: src/paperphone/booklet_content.py:125
+msgid "Tomorrow"
 msgstr ""
 
-#: src/paperphone/main.py:64
-msgid "Start preparing"
+#: src/paperphone/booklet_content.py:127
+#, python-brace-format
+msgid "In {days} days"
 msgstr ""
 
-#: src/paperphone/main.py:68
-msgid "Startup check complete."
+#: src/paperphone/booklet_content.py:129
+#, python-brace-format
+msgid "{days} days ago"
+msgstr ""
+
+#: src/paperphone/booklet_content.py:132 src/paperphone/todo_selection.py:213
+#, python-brace-format
+msgid "Due: {when}"
+msgstr ""
+
+#. FrontModule.toExtent: dd MMMM yyyy。日本語カタログは年月日の数値形式へ。
+#: src/paperphone/booklet_content.py:191
+msgid "%d %B %Y"
+msgstr ""
+
+#: src/paperphone/booklet_content.py:198
+msgid "CONTACTS"
+msgstr ""
+
+#: src/paperphone/booklet_content.py:198
+msgid "CALENDAR"
+msgstr ""
+
+#: src/paperphone/booklet_content.py:198
+msgid "TASKS"
+msgstr ""
+
+#: src/paperphone/booklet_content.py:247
+msgid "WEATHER"
+msgstr ""
+
+#: src/paperphone/booklet_asset_view.py:73
+#: src/paperphone/booklet_asset_view.py:102
+#: src/paperphone/booklet_asset_view.py:104
+msgid "Choose a local photo"
+msgstr ""
+
+#: src/paperphone/booklet_asset_view.py:74
+msgid "Clear photo"
+msgstr ""
+
+#: src/paperphone/booklet_asset_view.py:82
+#: src/paperphone/booklet_asset_view.py:240
+msgid "No photo selected."
+msgstr ""
+
+#: src/paperphone/booklet_asset_view.py:87
+#: src/paperphone/booklet_asset_view.py:92
+#: src/paperphone/booklet_asset_view.py:248
+msgid "Paper app"
+msgstr ""
+
+#: src/paperphone/booklet_asset_view.py:89
+#: src/paperphone/booklet_asset_view.py:246
+msgid "None"
+msgstr ""
+
+#: src/paperphone/booklet_asset_view.py:93
+msgid "Notes"
+msgstr ""
+
+#: src/paperphone/booklet_asset_view.py:94
+msgid "Card cutting guides"
+msgstr ""
+
+#: src/paperphone/booklet_asset_view.py:129
+msgid "Choosing a photo…"
+msgstr ""
+
+#: src/paperphone/booklet_asset_view.py:149
+#: src/paperphone/booklet_asset_view.py:159
+msgid "Photo selection was cancelled."
+msgstr ""
+
+#: src/paperphone/booklet_asset_view.py:170
+msgid "Reading selected photo…"
+msgstr ""
+
+#: src/paperphone/booklet_asset_view.py:182
+msgid "The selected photo could not be read. Choose a readable local image."
+msgstr ""
+
+#: src/paperphone/booklet_maps.py:69
+msgid "MAPS"
+msgstr ""
+
+#: src/paperphone/booklet_maps.py:70
+msgid "LEAVING FROM"
+msgstr ""
+
+#: src/paperphone/booklet_maps.py:71
+msgid "GOING TO"
+msgstr ""
+
+#: src/paperphone/contact_selection.py:31
+#: src/paperphone/contact_selection.py:55 src/paperphone/application_view.py:44
+msgid "Contacts"
+msgstr ""
+
+#: src/paperphone/contact_selection.py:36
+msgid "Select up to 7 contacts."
+msgstr ""
+
+#: src/paperphone/contact_selection.py:41
+msgid "You can select up to 7 contacts."
+msgstr ""
+
+#: src/paperphone/contact_selection.py:46
+msgid "No contacts with phone numbers are available."
+msgstr ""
+
+#: src/paperphone/application_view.py:36
+msgid "Settings"
+msgstr ""
+
+#: src/paperphone/application_view.py:36
+msgid "Language"
+msgstr ""
+
+#: src/paperphone/application_view.py:36
+msgid "Name on cover"
+msgstr ""
+
+#: src/paperphone/application_view.py:36
+msgid "MET Norway client contact"
+msgstr ""
+
+#: src/paperphone/application_view.py:37
+#: src/paperphone/weather_location_view.py:43
+msgid "Location and client contact are sent to MET Norway."
+msgstr ""
+
+#: src/paperphone/application_view.py:38
+msgid "Save settings"
+msgstr ""
+
+#: src/paperphone/application_view.py:38
+msgid "Invalid contact."
+msgstr ""
+
+#: src/paperphone/application_view.py:39
+msgid "Sources"
+msgstr ""
+
+#: src/paperphone/application_view.py:39 src/paperphone/refresh_view.py:41
+msgid "Refresh selected sources"
+msgstr ""
+
+#: src/paperphone/application_view.py:39 src/paperphone/refresh_view.py:45
+msgid "Cancel"
+msgstr ""
+
+#: src/paperphone/application_view.py:40
+msgid "Sources from GNOME accounts."
+msgstr ""
+
+#: src/paperphone/application_view.py:40
+msgid "Not read yet."
+msgstr ""
+
+#: src/paperphone/application_view.py:41
+msgid "OK"
+msgstr ""
+
+#: src/paperphone/application_view.py:41 src/paperphone/application_view.py:63
+#: src/paperphone/application_view.py:64 src/paperphone/application_view.py:65
+msgid "Failed."
+msgstr ""
+
+#: src/paperphone/application_view.py:41 src/paperphone/refresh_view.py:111
+msgid "Reading selected sources…"
+msgstr ""
+
+#: src/paperphone/application_view.py:41
+msgid "Source access failed."
+msgstr ""
+
+#: src/paperphone/application_view.py:42
+msgid ""
+"CalDAV changes were not confirmed; cached items are excluded until "
+"acknowledged."
+msgstr ""
+
+#: src/paperphone/application_view.py:43
+msgid "I acknowledge exclusion of this source"
+msgstr ""
+
+#: src/paperphone/application_view.py:43
+msgid "Selection changed. Generate again to update the PDF."
+msgstr ""
+
+#: src/paperphone/application_view.py:44
+msgid "Removed unavailable selections."
+msgstr ""
+
+#: src/paperphone/application_view.py:44
+msgid "Calendar"
+msgstr ""
+
+#: src/paperphone/application_view.py:44
+msgid "Tasks"
+msgstr ""
+
+#: src/paperphone/application_view.py:44
+msgid "Weather"
+msgstr ""
+
+#: src/paperphone/application_view.py:45
+msgid "Walking map"
+msgstr ""
+
+#: src/paperphone/application_view.py:45
+msgid "Photos"
+msgstr ""
+
+#: src/paperphone/application_view.py:45
+msgid "Paper apps"
+msgstr ""
+
+#: src/paperphone/application_view.py:45
+msgid "PDF"
+msgstr ""
+
+#: src/paperphone/application_view.py:46
+msgid "Generate booklet"
+msgstr ""
+
+#: src/paperphone/application_view.py:46
+msgid "Confirm unavailable source exclusions before generating."
+msgstr ""
+
+#: src/paperphone/application_view.py:47
+msgid "Generating booklet…"
+msgstr ""
+
+#: src/paperphone/application_view.py:47
+msgid "Booklet ready. Later edits do not change this PDF."
+msgstr ""
+
+#: src/paperphone/application_view.py:48
+msgid "Generation failed. Your previous PDF has been kept."
+msgstr ""
+
+#: src/paperphone/application_view.py:49
+msgid "Walking map failed. The map is not included."
+msgstr ""
+
+#. 回路失敗でも他の内容は印刷する。
+#: src/paperphone/application_view.py:50
+msgid "Source selection changed during refresh; old results were ignored."
+msgstr ""
+
+#: src/paperphone/application_view.py:51 src/paperphone/refresh_view.py:126
+msgid "Refresh cancelled."
+msgstr ""
+
+#: src/paperphone/application_view.py:51
+msgid "No events for today."
+msgstr ""
+
+#: src/paperphone/application_view.py:52
+msgid "Photo selection is still in progress."
+msgstr ""
+
+#: src/paperphone/application_view.py:53 src/paperphone/osm_region_view.py:56
+msgid "Delete stored map data"
+msgstr ""
+
+#: src/paperphone/application_view.py:53
+msgid "Map data deleted."
+msgstr ""
+
+#: src/paperphone/application_view.py:53
+msgid "Map data could not be deleted."
+msgstr ""
+
+#: src/paperphone/application_view.py:54
+msgid "Settings could not be saved."
+msgstr ""
+
+#: src/paperphone/application_view.py:55
+msgid "photo: excluded"
+msgstr ""
+
+#: src/paperphone/application_view.py:55
+msgid "weather: excluded"
+msgstr ""
+
+#: src/paperphone/application_view.py:55
+msgid "map: excluded"
+msgstr ""
+
+#: src/paperphone/application_view.py:55
+#, python-brace-format
+msgid "{source}: excluded"
+msgstr ""
+
+#: src/paperphone/application_view.py:56
+#, python-brace-format
+msgid "Map failure: {reason}"
+msgstr ""
+
+#: src/paperphone/application_view.py:56
+msgid "Task List"
+msgstr ""
+
+#: src/paperphone/application_view.py:56
+msgid "Address Book"
+msgstr ""
+
+#: src/paperphone/application_view.py:61
+msgid "OK."
+msgstr ""
+
+#: src/paperphone/application_view.py:62
+msgid "Not registered."
+msgstr ""
+
+#: src/paperphone/application_services.py:43
+msgid "Choose both departure and destination."
+msgstr ""
+
+#: src/paperphone/application_services.py:44
+msgid "The map index and selected extract do not match."
+msgstr ""
+
+#: src/paperphone/application_services.py:45
+msgid "An endpoint is outside the selected prefecture."
+msgstr ""
+
+#: src/paperphone/application_services.py:46
+msgid "The walking road graph is disconnected between these endpoints."
+msgstr ""
+
+#: src/paperphone/application_services.py:47
+msgid "No walking road is close enough to an endpoint."
+msgstr ""
+
+#: src/paperphone/application_services.py:48
+msgid "No walking roads are available in this area."
+msgstr ""
+
+#: src/paperphone/application_services.py:49
+msgid "An endpoint is outside the routing area."
+msgstr ""
+
+#: src/paperphone/application_services.py:50
+msgid "The map content does not fit the printable page."
+msgstr ""
+
+#: src/paperphone/application_services.py:51
+msgid "The walking route is invalid."
+msgstr ""
+
+#: src/paperphone/application_services.py:52
+msgid "The walking endpoints are invalid."
+msgstr ""
+
+#: src/paperphone/application_services.py:53
+msgid "The routing area is invalid."
+msgstr ""
+
+#: src/paperphone/application_services.py:54
+msgid "The local road data could not be read."
+msgstr ""
+
+#: src/paperphone/application_services.py:55
+msgid "The local map source is unavailable."
+msgstr ""
+
+#: src/paperphone/application_services.py:56
+#: src/paperphone/application_services.py:57
+msgid "The local walking route is unavailable."
+msgstr ""
+
+#: src/paperphone/application_services.py:58
+msgid "The booklet could not be rendered."
+msgstr ""
+
+#: src/paperphone/application_services.py:108
+#, python-brace-format
+msgid "Panel {panel}: some text was shortened ({count})."
+msgstr ""
+
+#: src/paperphone/application_services.py:109
+#, python-brace-format
+msgid "Panel {panel}: items did not fit ({count})."
+msgstr ""
+
+#: src/paperphone/application_services.py:110
+#, python-brace-format
+msgid "Panel {panel}: an invalid date could not be printed ({count})."
+msgstr ""
+
+#: src/paperphone/application_services.py:111
+#, python-brace-format
+msgid "Panel {panel}: weather data could not be printed ({count})."
+msgstr ""
+
+#: src/paperphone/application_services.py:112
+#, python-brace-format
+msgid "Map: a location name was shortened ({count})."
+msgstr ""
+
+#: src/paperphone/application_services.py:114
+msgid "Some booklet content could not be printed."
+msgstr ""
+
+#: src/paperphone/pdf_output.py:76 src/paperphone/pdf_output.py:179
+msgid "Generate a booklet to preview, save or print."
+msgstr ""
+
+#: src/paperphone/pdf_output.py:85 src/paperphone/pdf_output.py:142
+msgid "PDF preview"
+msgstr ""
+
+#: src/paperphone/pdf_output.py:86
+msgid "Previous page"
+msgstr ""
+
+#: src/paperphone/pdf_output.py:87
+msgid "Next page"
+msgstr ""
+
+#: src/paperphone/pdf_output.py:94
+msgid "Save PDF…"
+msgstr ""
+
+#: src/paperphone/pdf_output.py:95
+msgid "Print…"
+msgstr ""
+
+#: src/paperphone/pdf_output.py:102
+msgid ""
+"Print on A4 paper in landscape at 100% (Actual Size), one PDF page per "
+"sheet. Disable Fit to Page."
+msgstr ""
+
+#: src/paperphone/pdf_output.py:105
+msgid "Folding instructions"
+msgstr ""
+
+#: src/paperphone/pdf_output.py:107
+msgid ""
+"If the optional map page is printed on the reverse, lay it map-side up and "
+"fold in half so the two circles touch. Fold in half again so the squares "
+"touch, then fold in half one last time. Without a map page, use the main-"
+"page fold marks and check the cover orientation. If using the card guides, "
+"carefully cut along the dotted diagonal lines to hold a contactless card."
+msgstr ""
+
+#: src/paperphone/pdf_output.py:162
+msgid "PDF ready. Preview, save and print use this same snapshot."
+msgstr ""
+
+#: src/paperphone/pdf_output.py:188
+#, python-brace-format
+msgid "Page {page} of {pages}"
+msgstr ""
+
+#: src/paperphone/pdf_output.py:189
+msgid "No PDF"
+msgstr ""
+
+#: src/paperphone/pdf_output.py:236 src/paperphone/pdf_output.py:244
+msgid "Save cancelled. PDF unchanged."
+msgstr ""
+
+#: src/paperphone/pdf_output.py:237 src/paperphone/pdf_output.py:251
+#: src/paperphone/pdf_output.py:265
+msgid "Could not save PDF. Existing files and the PDF snapshot are unchanged."
+msgstr ""
+
+#: src/paperphone/pdf_output.py:246
+msgid "Choose a local file to save the PDF. The PDF snapshot is unchanged."
+msgstr ""
+
+#: src/paperphone/pdf_output.py:253
+msgid "PDF saved."
+msgstr ""
+
+#: src/paperphone/pdf_output.py:259
+msgid "Save PDF"
+msgstr ""
+
+#: src/paperphone/pdf_output.py:301
+msgid "Could not print PDF. The PDF snapshot is unchanged."
+msgstr ""
+
+#: src/paperphone/pdf_output.py:303
+msgid "Print cancelled. PDF unchanged."
+msgstr ""
+
+#: src/paperphone/pdf_output.py:305
+msgid "Print operation accepted. Physical printing is not confirmed."
+msgstr ""
+
+#: src/paperphone/osm_region_view.py:22 src/paperphone/osm_region_view.py:23
+msgid "Download failed."
+msgstr ""
+
+#: src/paperphone/osm_region_view.py:24
+msgid "Extract unavailable."
+msgstr ""
+
+#: src/paperphone/osm_region_view.py:25
+msgid "Access denied."
+msgstr ""
+
+#: src/paperphone/osm_region_view.py:26
+msgid "Rate limited."
+msgstr ""
+
+#: src/paperphone/osm_region_view.py:27
+msgid "Wait before retrying."
+msgstr ""
+
+#: src/paperphone/osm_region_view.py:28
+msgid "Downloaded data is invalid."
+msgstr ""
+
+#: src/paperphone/osm_region_view.py:29
+msgid "Saved data is damaged."
+msgstr ""
+
+#: src/paperphone/osm_region_view.py:30
+msgid "Save failed."
+msgstr ""
+
+#: src/paperphone/osm_region_view.py:31
+msgid "Unexpected redirect."
+msgstr ""
+
+#: src/paperphone/osm_region_view.py:32
+msgid "Not confirmed."
+msgstr ""
+
+#: src/paperphone/osm_region_view.py:33
+msgid "Map data could not be prepared."
+msgstr ""
+
+#: src/paperphone/osm_region_view.py:50 src/paperphone/osm_region_view.py:87
+msgid "Select a prefecture"
+msgstr ""
+
+#: src/paperphone/osm_region_view.py:54 src/paperphone/osm_region_view.py:95
+msgid "Prefecture"
+msgstr ""
+
+#: src/paperphone/osm_region_view.py:55
+msgid "Check for updates"
+msgstr ""
+
+#: src/paperphone/osm_region_view.py:109
+#: src/paperphone/weather_location_view.py:25
+msgid "Location unavailable."
+msgstr ""
+
+#: src/paperphone/osm_region_view.py:191 src/paperphone/osm_region_view.py:197
+msgid "Deleted."
+msgstr ""
+
+#: src/paperphone/place_selection.py:34
+msgid "Use current location as departure"
+msgstr ""
+
+#: src/paperphone/place_selection.py:43
+msgid "Departure"
+msgstr ""
+
+#: src/paperphone/place_selection.py:43
+msgid "Destination"
+msgstr ""
+
+#: src/paperphone/place_selection.py:53 src/paperphone/place_selection.py:118
+#: src/paperphone/place_selection.py:163
+msgid "No place selected."
+msgstr ""
+
+#: src/paperphone/place_selection.py:121 src/paperphone/place_selection.py:187
+msgid "Search stays on this device."
+msgstr ""
+
+#: src/paperphone/place_selection.py:132
+msgid "Building the local place index…"
+msgstr ""
+
+#: src/paperphone/place_selection.py:154
+msgid "Place index unavailable."
+msgstr ""
+
+#: src/paperphone/place_selection.py:170
+msgid "Current location"
+msgstr ""
+
+#: src/paperphone/place_selection.py:175
+msgid ""
+"Current location is outside the selected prefecture. Search for a departure."
+msgstr ""
+
+#: src/paperphone/place_selection.py:207
+msgid "Enter a place name."
+msgstr ""
+
+#: src/paperphone/place_selection.py:210
+msgid "Searching local places…"
+msgstr ""
+
+#: src/paperphone/place_selection.py:232
+msgid "Search failed."
+msgstr ""
+
+#: src/paperphone/place_selection.py:233
+msgid "No local places found."
+msgstr ""
+
+#: src/paperphone/place_selection.py:237
+msgid "This place is outside the selected prefecture."
+msgstr ""
+
+#: src/paperphone/refresh_view.py:54
+msgid "Not refreshed yet."
+msgstr ""
+
+#: src/paperphone/refresh_view.py:94
+msgid "Refresh could not be started."
+msgstr ""
+
+#: src/paperphone/refresh_view.py:128
+msgid "CalDAV changes were not confirmed. Cached tasks may be shown."
+msgstr ""
+
+#: src/paperphone/refresh_view.py:130
+msgid "Some sources could not be read."
+msgstr ""
+
+#: src/paperphone/refresh_view.py:132
+msgid "Refresh complete."
 msgstr ""
 
 #: src/paperphone/resources.py:37
@@ -85,6 +724,266 @@ msgstr ""
 msgid "Typography"
 msgstr ""
 
-#: src/paperphone/osm_region_view.py:33
-msgid "Map data could not be prepared."
+#: src/paperphone/todo_selection.py:23
+msgid "Upcoming"
+msgstr ""
+
+#: src/paperphone/todo_selection.py:24
+msgid "No due date"
+msgstr ""
+
+#: src/paperphone/todo_selection.py:60 src/paperphone/todo_selection.py:79
+msgid "No tasks in this category."
+msgstr ""
+
+#: src/paperphone/todo_selection.py:83 src/paperphone/todo_selection.py:188
+msgid "Overdue"
+msgstr ""
+
+#: src/paperphone/todo_selection.py:86 src/paperphone/todo_selection.py:167
+msgid "Untitled task"
+msgstr ""
+
+#: src/paperphone/todo_selection.py:207
+#, python-brace-format
+msgid "Starts: {when}"
+msgstr ""
+
+#: src/paperphone/weather_location_view.py:20
+msgid "Requesting location permission…"
+msgstr ""
+
+#: src/paperphone/weather_location_view.py:21
+msgid "Fetching weather…"
+msgstr ""
+
+#: src/paperphone/weather_location_view.py:23
+msgid "Location denied."
+msgstr ""
+
+#: src/paperphone/weather_location_view.py:24
+msgid "Location timed out."
+msgstr ""
+
+#: src/paperphone/weather_location_view.py:26
+msgid "Location service returned unusable coordinates. Nothing was sent."
+msgstr ""
+
+#: src/paperphone/weather_location_view.py:27
+msgid "Weather fetch failed."
+msgstr ""
+
+#: src/paperphone/weather_location_view.py:30
+msgid "No forecast left for today."
+msgstr ""
+
+#: src/paperphone/weather_location_view.py:48
+msgid "Fetch weather"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:43
+msgid "Clear sky"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:44
+msgid "Fair"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:45
+msgid "Partly cloudy"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:46
+msgid "Cloudy"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:47
+msgid "Fog"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:48
+msgid "Light rain"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:49
+msgid "Rain"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:50
+msgid "Heavy rain"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:51
+msgid "Light rain and thunder"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:52
+msgid "Rain and thunder"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:53
+msgid "Heavy rain and thunder"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:54
+msgid "Light sleet"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:55
+msgid "Sleet"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:56
+msgid "Heavy sleet"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:57
+msgid "Light sleet and thunder"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:58
+msgid "Sleet and thunder"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:59
+msgid "Heavy sleet and thunder"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:60
+msgid "Light snow"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:61
+msgid "Snow"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:62
+msgid "Heavy snow"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:63
+msgid "Light snow and thunder"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:64
+msgid "Snow and thunder"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:65
+msgid "Heavy snow and thunder"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:66
+msgid "Light rain showers"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:67
+msgid "Rain showers"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:68
+msgid "Heavy rain showers"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:69
+msgid "Light rain showers and thunder"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:70
+msgid "Rain showers and thunder"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:71
+msgid "Heavy rain showers and thunder"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:72
+msgid "Light sleet showers"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:73
+msgid "Sleet showers"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:74
+msgid "Heavy sleet showers"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:75
+msgid "Light sleet showers and thunder"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:76
+msgid "Sleet showers and thunder"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:77
+msgid "Heavy sleet showers and thunder"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:78
+msgid "Light snow showers"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:79
+msgid "Snow showers"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:80
+msgid "Heavy snow showers"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:81
+msgid "Light snow showers and thunder"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:82
+msgid "Snow showers and thunder"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:83
+msgid "Heavy snow showers and thunder"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:102
+msgid "MORNING"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:104
+msgid "AFTERNOON"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:105
+msgid "EVENING"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:194
+#, python-brace-format
+msgid "{t} °C"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:195 src/paperphone/weather_rendering.py:30
+msgid "Unknown weather condition"
+msgstr ""
+
+#: src/paperphone/weather_sheet.py:196
+#, python-brace-format
+msgid "({start}–{end})"
+msgstr ""
+
+#: src/paperphone/weather_rendering.py:28
+#, python-brace-format
+msgid "{t} °C ({start}–{end})"
+msgstr ""
+
+#. xgettext 0.21はf-string内部の呼出しを抽出できない。現行ソースにあるmsgidで、このファイルに手動維持する。
+msgid "All day"
+msgstr ""
+
+#. xgettext 0.21はf-string内部の呼出しを抽出できない。現行ソースにあるmsgidで、このファイルに手動維持する。
+msgid "Credentials needed."
+msgstr ""
+
+#. ソース外部の契約: tests/test_smoke.pyがこのmsgidの原文と日本語訳を検定する。
+msgid "Create, preview, save, and print your paper booklet."
 msgstr ""

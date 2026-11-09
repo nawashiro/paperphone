@@ -10,7 +10,8 @@ from paperphone.selection import GenerationSnapshot
 from paperphone.weather import Forecast, ForecastResult
 from paperphone.weather_location import WeatherLocationResult, WeatherLocationState
 from paperphone.i18n import gettext_for
-from paperphone.weather_sheet import build_weather_sheet, known_symbol, weather_lines
+from paperphone.weather_sheet import (build_weather_sheet, known_symbol, weather_lines,
+                                      symbol_description, time_of_day)
 
 UTC = timezone.utc
 _ = gettext_for()
@@ -92,6 +93,34 @@ class WeatherSheetTests(unittest.TestCase):
         self.assertEqual(sheet.fetched_at, result.fetched_at)
         self.assertEqual(sheet.checked_at, checked.checked_at)
         self.assertIn("MET Norway", weather_lines(sheet)[-1])
+
+    def test_variant_symbols_share_the_base_description(self):
+        self.assertEqual(symbol_description("clearsky_day"), symbol_description("clearsky"))
+        self.assertEqual(symbol_description("snowshowers_polartwilight"),
+                         symbol_description("snowshowers"))
+        self.assertEqual(symbol_description("lightrain"), "Light rain")
+        self.assertIsNone(symbol_description("future_unknown"))
+        self.assertIsNone(symbol_description(None))
+        self.assertEqual(symbol_description("lightsleetshowers"), "Light sleet showers")
+
+    def test_time_of_day_matches_android_slots(self):
+        self.assertIsNone(time_of_day(NOW.replace(hour=8, minute=59)))
+        self.assertEqual(time_of_day(NOW.replace(hour=9, minute=0)), "MORNING")
+        self.assertEqual(time_of_day(NOW.replace(hour=12, minute=0)), "AFTERNOON")
+        self.assertEqual(time_of_day(NOW.replace(hour=18, minute=0)), "EVENING")
+        self.assertEqual(time_of_day(NOW.replace(hour=23, minute=30)), "EVENING")
+
+    def test_lines_use_human_description_without_symbol_code(self):
+        sheet = build_weather_sheet(result_at(symbol="lightrain"), now=NOW)
+        lines = weather_lines(sheet)
+        self.assertIn("09:30", lines[0])
+        self.assertIn("Light rain", lines[0])
+        self.assertIn("09:30–10:30", lines[0])
+        self.assertNotIn("lightrain", lines[0])
+        self.assertEqual(len(lines), 2)
+        unknown = build_weather_sheet(result_at(symbol="future_unknown"), now=NOW)
+        self.assertIn("Unknown weather condition", weather_lines(unknown)[0])
+        self.assertNotIn("future_unknown", weather_lines(unknown)[0])
 
 
 class WeatherDetailsViewTests(unittest.TestCase):

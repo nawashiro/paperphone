@@ -106,8 +106,7 @@ class BookletContentTests(unittest.TestCase):
             self.assertEqual(result.warnings, ())
 
     def test_japanese_cover_date_translation_and_calendar_label(self):
-        translations = {"%d %B %Y": "%Y年%m月%d日", "All day": "終日", "CALENDAR": "予定",
-                        "{name}'S": "{name}の", "PHONE": "ペーパーフォン"}
+        translations = {"%d %B %Y": "%Y年%m月%d日", "All day": "終日", "CALENDAR": "予定"}
         event = CalendarEvent("fixture", "instance", "架空の予定", DateOnly(date(2026, 1, 2)),
                               DateOnly(date(2026, 1, 3)))
         with patch("paperphone.booklet_content.gettext_for",
@@ -116,7 +115,9 @@ class BookletContentTests(unittest.TestCase):
         text = text_of(result.pdf)
         self.assertIn("2026年01月02日", "".join(text.split()))
         self.assertIn("終日", text)
-        self.assertIn("見本の", text)
+        self.assertIn("見本'S", text)
+        self.assertIn("PHONE", text)
+        self.assertNotIn("ペーパーフォン", text)
         self.assertEqual(result.warnings, ())
 
     def test_source_zone_conversion_uses_target_date_dst_and_real_minutes(self):
@@ -215,6 +216,9 @@ class BookletContentTests(unittest.TestCase):
         self.assertIn(translate("All day"), text)
         self.assertIn(translate("WEATHER"), text)
         self.assertIn("09:30", text)
+        self.assertIn("見本'S", text)
+        self.assertIn("PHONE", text)
+        self.assertNotIn("見本の", text)
         self.assertEqual(result.warnings, ())
 
     def test_missing_bundled_fonts_raise_safe_error(self):

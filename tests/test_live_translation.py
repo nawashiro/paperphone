@@ -34,6 +34,16 @@ class LiveTranslationTests(unittest.TestCase):
         scope.start()
         self.addCleanup(scope.stop)
 
+    def test_weather_description_translates_in_the_japanese_catalog(self):
+        from paperphone.weather_sheet import weather_lines, build_weather_sheet
+        import tests.test_weather_sheet as sample
+
+        with using_language("ja"):
+            sheet = build_weather_sheet(sample.result_at(symbol="lightrain"), now=sample.NOW)
+            line = weather_lines(sheet)[0]
+            self.assertIn("小雨", line)
+            self.assertNotIn("lightrain", line)
+
     def test_dynamic_display_and_context_local_generation_languages_are_independent(self):
         live = gettext_for()
         fixed = gettext_for("en")

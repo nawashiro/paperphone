@@ -183,9 +183,10 @@ def core_painters(snapshot: GenerationSnapshot, *, name: str,
         2: tuple(dict(i.fields) for i in snapshot.items if i.category in ("today", "upcoming", "undated")),
     }
     def cover(ctx, width, height):
-        _text(ctx, _("{name}'S").format(name=name.upper()), 0, 0, width, 17.78,
+        # 見出しは翻訳カタログの適用外。氏名以外の文言はどの言語でも同じにする。
+        _text(ctx, "{name}'S".format(name=name.upper()), 0, 0, width, 17.78,
               panel=5, warnings=warnings)
-        _text(ctx, _("PHONE"), 0, 24, width, 17.78, panel=5, warnings=warnings)
+        _text(ctx, "PHONE", 0, 24, width, 17.78, panel=5, warnings=warnings)
         # FrontModule.toExtent: dd MMMM yyyy。日本語カタログは年月日の数値形式へ。
         _text(ctx, _cover_date(today, _("%d %B %Y")), 0, height - 12, width, 9,
               panel=5, warnings=warnings)
