@@ -13,6 +13,14 @@
 
 Pythonパッケージは[requirements.txt](<../requirements.txt>)をネイティブ配布の依存入力にする。GIと証明書はpipだけでは揃うと仮定しない。ディストリビューションのパッケージ名は異なるため、上記の機能とGI名前空間で確認する。
 
+## GTK 4.15の自前プレフィックスでのテスト
+
+GTK 4.14以上の.typelibとGIRがベースシステムに用意されない環境では、GLib/GObject-Introspection/Cairo/Pango/GTK/libadwaitaを1つのプレフィックス（例: `/usr/local/gtk414`配下にビルドして整理）にまとめると、テストはディストリのPython 3.11・PyGObjectで動く：
+
+- テスト実行は`GI_TYPELIB_PATH`を自前プレフィックスの`lib/x86_64-linux-gnu/girepository-1.0`に先頭で向ける（ディストリのtypelibは上流のGLib系リポジトリから参照しているため混用可）。`LD_LIBRARY_PATH`にプレフィックスの`lib/x86_64-linux-gnu`を追加する。GTK の`Gtk.init()`にはディスプレイが必要なので`xvfb-run`を利用する。
+- スキャナがソースを処理するときはプレフィックスの`g-ir-scanner`（gobject-introspection 1.82）をPATHの先頭に置く。cairoはGTK 4.14の要求（>=1.18）を満たすため1.18系列を直接ビルドする。
+- 2026-11-08の実測: glib2.84.4・pango1.52.2・cairo1.18.4・gtk4.15.6（GitLabの4.14.6タグ）・libadwaita1.5.8の組合せで`meson setup build/gnome`と`Meson`以外の391+テスト（410件）が通過した。
+
 ## 開発環境と構成検査
 
 ```sh
