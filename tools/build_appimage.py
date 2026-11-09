@@ -5,7 +5,7 @@
 requirements.txt通りのwheelをPython 3.10のvenvに置き、`meson install --destdir`
 の出力をAppDirへ組み替えてappimagetoolで固める。再実行は同じ構成のAppImageを作る。
 
-podman run --rm -it -v "$PWD":/src:Z ubuntu:22.04 /src/tools/build_appimage.sh --inside
+podman run --rm -it -v "$PWD":/src:Z ubuntu:22.04 python3 /src/tools/build_appimage.py --inside
 """
 
 import os
@@ -20,6 +20,8 @@ BUILD = REPO / "build" / "appimage"
 PREFIX = BUILD / "prefix"
 APPDIR = BUILD / "AppDir"
 STAGE = REPO / "build" / "stage"
+APPSTAGE = REPO / "build" / "appstage"
+VENV = PREFIX / "python"
 
 GLIB = "2.84.4"
 CAIRO = "1.18.4"
@@ -27,6 +29,7 @@ PANGO = "1.52.2"
 GRAPHENE = "1.10.8"
 GTK4 = "4.15.6"
 LIBADWAITA = "1.5.8"
+APPSTREAM = "1.0.4"
 GDK_PIXBUF = "2.42.12"
 GOBJECT_INTROSPECTION = "1.82.0"
 
@@ -40,7 +43,8 @@ NATIVE_DEPS = (
     "wayland-protocols libwayland-bin libdrm-dev libgbm-dev libegl1-mesa-dev libepoxy-dev "
     "libjpeg-dev libtiff-dev libwebp-dev cmake gobject-introspection libgirepository1.0-dev "
     "gir1.2-glib-2.0 gir1.2-poppler-0.18 libpoppler-glib-dev poppler-data "
-    "fonts-noto-cjk shared-mime-info desktop-file-utils"
+    "libyaml-dev libcurl4-openssl-dev liblzma-dev libzstd-dev libmagic-dev gperf itstool xsltproc docbook-xsl "
+    "fonts-noto-cjk shared-mime-info desktop-file-utils file"
 )
 
 STACK = (
@@ -49,6 +53,10 @@ STACK = (
     ("gobject-introspection", GOBJECT_INTROSPECTION,
      "https://download.gnome.org/sources/gobject-introspection/1.82/"
      "gobject-introspection-1.82.0.tar.xz"),
+    ("libxmlb", "0.3.21",
+     "https://github.com/hughsie/libxmlb/archive/refs/tags/0.3.21.tar.gz"),
+    ("appstream", APPSTREAM,
+     "https://github.com/ximion/appstream/archive/refs/tags/v1.0.4.tar.gz"),
     ("cairo", CAIRO,
      "https://www.cairographics.org/releases/cairo-1.18.4.tar.xz"),
     ("graphene", GRAPHENE,
@@ -67,12 +75,37 @@ SKIP = {
     # glib単体ではintrospectionを組み、scannerはgobject-introspectionで作る。
     "glib": ["introspection=disabled"],
     "gobject-introspection": [],
+    # Ubuntu 22.04のlibxmlb 0.3.10はappstream 1.0.4の要求(>=0.3.14)に届かない。
+    "libxmlb": ["introspection=false", "gtkdoc=false", "tests=false",
+                "cli=false"],
+    # libadwaita 1.5.8が同梱するappstream.wrapはrevision=mainの可変先で、
+    # 現行mainはlibadwaitaが渡すsvg-supportオプションを失っている。
+    # 足りない分はlibxmlbと共に上のSTACKで固定版を組み、pkg-config経路で
+    # 解決させるため同梱subprojectには落ちない。
+    "appstream": [
+        "systemd=false", "apidocs=false", "install-docs=false",
+        "stemming=false", "svg-support=false", "gir=false",
+    ],
     "cairo": [],
     "graphene": ["introspection=enabled"],
     "pango": ["introspection=enabled"],
     "gdk-pixbuf": ["introspection=enabled", "man=false"],
-    "gtk": ["introspection=enabled", "media-gstreamer=disabled", "build-tests=false"],
-    "libadwaita": ["introspection=enabled"],
+    "gtk": [
+        "introspection=enabled",
+        "media-gstreamer=disabled",
+        "build-tests=false",
+        # Ubuntu 22.04のwayland 1.20/wayland-protocols 1.25はGTK 4.15の要求
+        # (>=1.21/>=1.36)に届かず、GTK同梱のwayland 1.21 subprojectは
+        # wayland-protocolsのtestsが足すwayland-scanner dependencyを提供しない。
+        # wayland backendを切ってX11のみから出す。GNOME Waylandセッションでは
+        # XWayland経路で動く。
+        "wayland-backend=false",
+        # Vulkanデバイス・ヘッダをAppImageに同梱する宛てがないため、
+        # 描写はNGL(GL 3.2+)経路に限る。
+        "vulkan=disabled",
+    ],
+    "libadwaita": ["introspection=enabled", "tests=false", "examples=false",
+                   "vapi=false"],
 }
 
 
@@ -131,24 +164,35 @@ def build_stack():
 
 
 def python_bundle():
-    venv = PREFIX / "python"
+    venv = VENV
     if (venv / ".stamp").is_file():
         return
     run(["python3", "-m", "venv", str(venv)], update=False)
     python = venv / "bin" / "python3"
     run([python, "-m", "pip", "install", "-r", REPO / "requirements.txt"], update=False)
-    run([python, "-m", "pip", "install", "pycairo", "PyGObject"], update=False)
+    # pipのビルド分離はPKG_CONFIG_PATHを担持子に渡さないため、mesonpyをvenvに
+    # 入れて分離なしで組み、同梱プレフィックスのGI/cairoに結合させる。
+    run([python, "-m", "pip", "install", "meson", "meson-python", "ninja"], update=False)
+    run([python, "-m", "pip", "install", "--no-build-isolation", "pycairo"], update=True)
+    # PyGObjectは目標のPythonにpycairoが入った状態でビルドする必要がある
+    # (gi/pygi-foreign-cairo.cがpy3cairo.hを必要とする)。
+    run([python, "-m", "pip", "install", "--no-build-isolation", "PyGObject"], update=True)
     (venv / ".stamp").touch()
 
 
 def collect_appdir():
-    build_dir = REPO / "build" / "appimage"
-    shutil.rmtree(build_dir, ignore_errors=True)
+    shutil.rmtree(APPSTAGE, ignore_errors=True)
     shutil.rmtree(STAGE, ignore_errors=True)
-    shutil.rmtree(APPDIR, ignore_errors=True)
+    shutil.rmtree(APPDIR, ignore_errors=True)    # メタデータ前の構成時python(pip install先)はvenvのsite-packagesを
+    # 見ず、GI同梱の読み込み試験も同pythonで走る。LD_LIBRARY_PATHはstack_env
+    # が同梱プレフィックスを先に置くためライブラリはそちらへ解決される。
+    site = str(VENV / "lib" / "python3.10" / "site-packages")
+    old_path = os.environ.get("PYTHONPATH")
+    os.environ["PYTHONPATH"] = site if not old_path else f"{site}:{old_path}"
     run(["meson", "setup", "--prefix=/usr",
-         "--python.purelibdir=/usr/lib/python3/dist-packages", build_dir], update=True)
-    run(["meson", "install", "--destdir", STAGE], cwd=build_dir, update=True)
+         "--python.purelibdir=/usr/lib/python3/dist-packages", APPSTAGE],
+        cwd=REPO, update=True)
+    run(["meson", "install", "--destdir", STAGE], cwd=APPSTAGE, update=True)
 
     APPDIR.mkdir(parents=True)
     stage_root = STAGE / "usr"
@@ -163,17 +207,15 @@ def collect_appdir():
     python_lib = PREFIX / "python" / "lib"
     if python_lib.is_dir():
         shutil.copytree(python_lib, APPDIR / "lib", symlinks=True, dirs_exist_ok=True)
+    # Python解釈系(3.10)と基盤stdlibを同梱。クリーン環境のpython3は宛てにならない。
+    Path(APPDIR / "usr" / "bin").mkdir(parents=True, exist_ok=True)
+    shutil.copy2("/usr/bin/python3.10", APPDIR / "usr" / "bin" / "python3.10")
+    shutil.copytree("/usr/lib/python3.10", APPDIR / "usr" / "lib" / "python3.10",
+                    symlinks=True, dirs_exist_ok=True)
     etc_certs = Path("/etc/ssl/certs")
     if etc_certs.is_dir():
         shutil.copytree(etc_certs, APPDIR / "etc" / "ssl" / "certs", symlinks=True,
                         dirs_exist_ok=True)
-    schemas = APPDIR / "usr" / "share" / "glib-2.0" / "schemas"
-    if schemas.is_dir():
-        run([PREFIX / "bin" / "glib-compile-schemas", schemas], update=False)
-    fonts = APPDIR / "usr" / "share" / "fonts"
-    if fonts.is_dir():
-        run(["fc-cache", "-f"], update=False)
-    # PopplerとGdkPixbufのtypelibはapt由来。メガライブラリへの同梱はELF追跡に任せる。
     girepo = APPDIR / "lib" / "x86_64-linux-gnu" / "girepository-1.0"
     girepo.mkdir(parents=True, exist_ok=True)
     system_girepo = Path("/usr/lib/x86_64-linux-gnu/girepository-1.0")
@@ -183,6 +225,26 @@ def collect_appdir():
         source = system_girepo / name
         if source.is_file():
             shutil.copy2(source, girepo / name)
+    schemas = PREFIX / "share" / "glib-2.0" / "schemas"
+    if schemas.is_dir():
+        shutil.copytree(schemas, APPDIR / "share" / "glib-2.0" / "schemas",
+                        symlinks=True, dirs_exist_ok=True)
+    # appimagetoolはdesktop・Iconを実AppDir直下で探す(root直下一覧のみ)。
+    # 配布用アプリIDは暫定(migrate-to-gnome 8.3で確定)。埋めるアイコンも暫定置き。
+    app_id = "com.withgoogle.experiments.unplugged"
+    shutil.copy2(REPO / "src" / "paperphone" / "resources" / "paper-apps" /
+                 "pigeon_origami.png", APPDIR / f"{app_id}.png")
+    desktop = APPDIR / f"{app_id}.desktop"
+    desktop.write_text(
+        "[Desktop Entry]\n"
+        "Type=Application\n"
+        f"Icon={app_id}\n"
+        "Name=Paper Phone\n"
+        "Name[ja]=ペーパーフォン\n"
+        "Exec=paperphone\n"
+        "Terminal=false\n"
+        "Categories=GNOME;GTK;Utility;\n"
+    )
 
 
 def bundle_runtime_libs():
@@ -238,21 +300,28 @@ def run_capture(command, update=False):
 
 
 def write_apprun():
-    """同梱プレフィックスとPython同梱だけを参照する。本体はホストのpython3。"""
+    """同梱プレフィックスと同梱Python(3.10)だけを参照し、ホストに委ねない。"""
     launcher = APPDIR / "AppRun"
     launcher.write_text(
         "#!/bin/sh\n"
         'HERE="$(dirname "$(readlink -f "$0")")"\n'
-        'ARCH="$(uname -m)"\n'
+        'ARCH="$(uname -m)-linux-gnu"\n'
         'export LD_LIBRARY_PATH="$HERE/lib/$ARCH"\n'
         'export GI_TYPELIB_PATH="$HERE/lib/$ARCH/girepository-1.0"\n'
         'export GIO_MODULE_DIR="$HERE/lib/$ARCH/gio/modules"\n'
         'export XDG_DATA_DIRS="$HERE/share:$XDG_DATA_DIRS"\n'
         'export SSL_CERT_DIR="$HERE/etc/ssl/certs"\n'
-        'export PYTHONPATH="$HERE/usr/lib/python3/dist-packages:'
+        'export PYTHONHOME="$HERE/usr"\n'
+        'export PYTHONPATH="$HERE/lib/python3/dist-packages:'
         '$HERE/lib/python3.10/site-packages"\n'
-        'exec python3 -m paperphone "$@"\n')
+        'exec "$HERE/usr/bin/paperphone" "$@"\n')
     launcher.chmod(0o755)
+
+    wrapper = APPDIR / "usr" / "bin" / "paperphone"
+    wrapper.write_text(
+        "#!/bin/sh\n"
+        'exec "$(dirname "$0")/python3.10" -m paperphone "$@"\n')
+    wrapper.chmod(0o755)
 
 
 def package():
@@ -263,9 +332,8 @@ def package():
             update=False)
     tool.chmod(0o755)
     suffix = os.environ.get("APPIMAGE_SUFFIX", "release")
-    run([tool, "--appimage-extract-and-run", APPDIR, "-o", BUILD / f"paperphone-{suffix}.AppImage"],
-        update=False)
     image = BUILD / f"paperphone-{suffix}.AppImage"
+    run([tool, "--appimage-extract-and-run", APPDIR, image], update=False)
     print("+", image, image.stat().st_size, "bytes")
 
 
