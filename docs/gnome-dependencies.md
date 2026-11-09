@@ -37,7 +37,7 @@ meson install -C build/gnome --destdir build/stage
 
 ## 動作確認（一般環境）
 
-自動テストは偽の依存・偽のダイアログだけを使う。実のGNOME環境での起動・ホストEDS読取・位置情報・地図保存・印刷・Flatpakは未検証であり、追加の利用者・環境確認が必要である：
+自動テストは偽の依存・偽のダイアログだけを使う。実のGNOME環境での起動・ホストEDS読取・位置情報・地図保存・印刷と、AppImageの実行確認は未検証であり、追加の利用者・環境確認が必要である：
 
 - セッションで`meson compile -C build/gnome`後の実起動と、設定の名前・言語・MET Norway連絡先の入力確認。
 - 既に構成済みのEDSアカウントやCalDAVタスクリストからの読取。
@@ -54,8 +54,8 @@ Google MapsからローカルOSM方式へ変更したため、地図機能のAPI
 - **設定**： アプリは表紙の名前・MET Norway用の連絡先・選択中の情報ソースと項目・紙アプリ等の選択を、`$XDG_CONFIG_HOME/paperphone/settings.json`に0600で原子的に書込む（[application_view.py](<../src/paperphone/application_view.py>)の`settings_file`と`save_settings_file`）。取得した連絡先・写真・地名そのものは保存しない。テストや開発環境では`PAPERPHONE_CONFIG_DIR`で保存先を切替えられる。設定の書き出しと復元は[tests/test_persistence.py](<../tests/test_persistence.py>)が担保する。
 - **整合**： `ItemKey.opaque_value()`／`from_opaque_value()`が選択の安定書式を持つ。保存や復元で名前・電話番号を文字列として含めない。
 
-## Flatpak候補
+## 配布候補
 
-現時点で製品用Flatpak manifestは存在しない。[既存の最小権限検証](<../openspec/changes/migrate-to-gnome/flatpak-eds-validation.md>)を維持し、最終manifest作成時には上記Python依存と必要なGI/Cairo連携をランタイム内へ含め、同じMeson検査を通す。ホストのインストールだけで充足したとみなさない。ホーム全体やセッションバス全開放を依存解決策にしない。
+配布はAppImageに決まり、Flatpakは配布候補から外れた。同梱するPython依存とGI/Cairo連携・日本語フォールバックフォント・証明書の検査対象は上記の機能一覧と`requirements.txt`で確認する。EDS接続の実績記録は[openspec/changes/migrate-to-gnome/flatpak-eds-validation.md](<../openspec/changes/migrate-to-gnome/flatpak-eds-validation.md>)を参考として残す。配布手順とクリーン環境試験は[openspec/changes/migrate-to-gnome/distribution-plan.md](<../openspec/changes/migrate-to-gnome/distribution-plan.md>)と[tools/build_appimage.py](<../tools/build_appimage.py>)を参照する。
 
-この文書は配布依存の入力であり、未作成manifestのビルド成功を報告するものではない。保存・印刷を含む最終配布環境での確認はタスク8.3で行う。上記の一般環境での追加試験は、実環境・実プリンター・利用者同意のあるデータ取得のために必要である。
+この文書は配布依存の入力であり、AppImageの作成成功を報告するものではない。保存・印刷を含む最終配布環境での確認はタスク8.3で行う。上記の一般環境での追加試験は、実環境・実プリンター・利用者同意のあるデータ取得のために必要である。

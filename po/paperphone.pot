@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: paperphone 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-09 04:01+0000\n"
+"POT-Creation-Date: 2026-11-09 04:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -127,7 +127,7 @@ msgid "GOING TO"
 msgstr ""
 
 #: src/paperphone/contact_selection.py:31
-#: src/paperphone/contact_selection.py:55 src/paperphone/application_view.py:44
+#: src/paperphone/contact_selection.py:55 src/paperphone/application_view.py:45
 msgid "Contacts"
 msgstr ""
 
@@ -196,8 +196,8 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
-#: src/paperphone/application_view.py:41 src/paperphone/application_view.py:63
-#: src/paperphone/application_view.py:64 src/paperphone/application_view.py:65
+#: src/paperphone/application_view.py:41 src/paperphone/application_view.py:64
+#: src/paperphone/application_view.py:65 src/paperphone/application_view.py:66
 msgid "Failed."
 msgstr ""
 
@@ -205,148 +205,148 @@ msgstr ""
 msgid "Reading selected sources…"
 msgstr ""
 
-#: src/paperphone/application_view.py:41
-msgid "Source access failed."
+#: src/paperphone/application_view.py:42
+msgid "Personal sources are unavailable. Set up GNOME Online Accounts first."
 msgstr ""
 
-#: src/paperphone/application_view.py:42
+#: src/paperphone/application_view.py:43
 msgid ""
 "CalDAV changes were not confirmed; cached items are excluded until "
 "acknowledged."
 msgstr ""
 
-#: src/paperphone/application_view.py:43
+#: src/paperphone/application_view.py:44
 msgid "I acknowledge exclusion of this source"
 msgstr ""
 
-#: src/paperphone/application_view.py:43
+#: src/paperphone/application_view.py:44
 msgid "Selection changed. Generate again to update the PDF."
 msgstr ""
 
-#: src/paperphone/application_view.py:44
+#: src/paperphone/application_view.py:45
 msgid "Removed unavailable selections."
 msgstr ""
 
-#: src/paperphone/application_view.py:44
+#: src/paperphone/application_view.py:45
 msgid "Calendar"
 msgstr ""
 
-#: src/paperphone/application_view.py:44
+#: src/paperphone/application_view.py:45
 msgid "Tasks"
 msgstr ""
 
-#: src/paperphone/application_view.py:44
+#: src/paperphone/application_view.py:45
 msgid "Weather"
 msgstr ""
 
-#: src/paperphone/application_view.py:45
+#: src/paperphone/application_view.py:46
 msgid "Walking map"
 msgstr ""
 
-#: src/paperphone/application_view.py:45
+#: src/paperphone/application_view.py:46
 msgid "Photos"
 msgstr ""
 
-#: src/paperphone/application_view.py:45
+#: src/paperphone/application_view.py:46
 msgid "Paper apps"
 msgstr ""
 
-#: src/paperphone/application_view.py:45
+#: src/paperphone/application_view.py:46
 msgid "PDF"
 msgstr ""
 
-#: src/paperphone/application_view.py:46
+#: src/paperphone/application_view.py:47
 msgid "Generate booklet"
 msgstr ""
 
-#: src/paperphone/application_view.py:46
+#: src/paperphone/application_view.py:47
 msgid "Confirm unavailable source exclusions before generating."
 msgstr ""
 
-#: src/paperphone/application_view.py:47
+#: src/paperphone/application_view.py:48
 msgid "Generating booklet…"
 msgstr ""
 
-#: src/paperphone/application_view.py:47
+#: src/paperphone/application_view.py:48
 msgid "Booklet ready. Later edits do not change this PDF."
 msgstr ""
 
-#: src/paperphone/application_view.py:48
+#: src/paperphone/application_view.py:49
 msgid "Generation failed. Your previous PDF has been kept."
 msgstr ""
 
-#: src/paperphone/application_view.py:49
+#: src/paperphone/application_view.py:50
 msgid "Walking map failed. The map is not included."
 msgstr ""
 
 #. 回路失敗でも他の内容は印刷する。
-#: src/paperphone/application_view.py:50
+#: src/paperphone/application_view.py:51
 msgid "Source selection changed during refresh; old results were ignored."
 msgstr ""
 
-#: src/paperphone/application_view.py:51 src/paperphone/refresh_view.py:126
+#: src/paperphone/application_view.py:52 src/paperphone/refresh_view.py:126
 msgid "Refresh cancelled."
 msgstr ""
 
-#: src/paperphone/application_view.py:51
+#: src/paperphone/application_view.py:52
 msgid "No events for today."
 msgstr ""
 
-#: src/paperphone/application_view.py:52
+#: src/paperphone/application_view.py:53
 msgid "Photo selection is still in progress."
 msgstr ""
 
-#: src/paperphone/application_view.py:53 src/paperphone/osm_region_view.py:56
+#: src/paperphone/application_view.py:54 src/paperphone/osm_region_view.py:56
 msgid "Delete stored map data"
 msgstr ""
 
-#: src/paperphone/application_view.py:53
+#: src/paperphone/application_view.py:54
 msgid "Map data deleted."
 msgstr ""
 
-#: src/paperphone/application_view.py:53
+#: src/paperphone/application_view.py:54
 msgid "Map data could not be deleted."
 msgstr ""
 
-#: src/paperphone/application_view.py:54
+#: src/paperphone/application_view.py:55
 msgid "Settings could not be saved."
 msgstr ""
 
-#: src/paperphone/application_view.py:55
+#: src/paperphone/application_view.py:56
 msgid "photo: excluded"
 msgstr ""
 
-#: src/paperphone/application_view.py:55
+#: src/paperphone/application_view.py:56
 msgid "weather: excluded"
 msgstr ""
 
-#: src/paperphone/application_view.py:55
+#: src/paperphone/application_view.py:56
 msgid "map: excluded"
 msgstr ""
 
-#: src/paperphone/application_view.py:55
+#: src/paperphone/application_view.py:56
 #, python-brace-format
 msgid "{source}: excluded"
 msgstr ""
 
-#: src/paperphone/application_view.py:56
+#: src/paperphone/application_view.py:57
 #, python-brace-format
 msgid "Map failure: {reason}"
 msgstr ""
 
-#: src/paperphone/application_view.py:56
+#: src/paperphone/application_view.py:57
 msgid "Task List"
 msgstr ""
 
-#: src/paperphone/application_view.py:56
+#: src/paperphone/application_view.py:57
 msgid "Address Book"
 msgstr ""
 
-#: src/paperphone/application_view.py:61
+#: src/paperphone/application_view.py:62
 msgid "OK."
 msgstr ""
 
-#: src/paperphone/application_view.py:62
+#: src/paperphone/application_view.py:63
 msgid "Not registered."
 msgstr ""
 

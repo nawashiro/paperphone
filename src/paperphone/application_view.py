@@ -38,7 +38,8 @@ MESSAGES = (
     N_("Save settings"), N_("Invalid contact."),
     N_("Sources"), N_("Refresh selected sources"), N_("Cancel"),
     N_("Sources from GNOME accounts."), N_("Not read yet."),
-    N_("OK"), N_("Failed."), N_("Reading selected sources…"), N_("Source access failed."),
+    N_("OK"), N_("Failed."), N_("Reading selected sources…"),
+    N_("Personal sources are unavailable. Set up GNOME Online Accounts first."),
     N_("CalDAV changes were not confirmed; cached items are excluded until acknowledged."),
     N_("I acknowledge exclusion of this source"), N_("Selection changed. Generate again to update the PDF."),
     N_("Removed unavailable selections."), N_("Contacts"), N_("Calendar"), N_("Tasks"), N_("Weather"),
@@ -468,7 +469,9 @@ class ApplicationView(Gtk.Box):
                 return
             if not ok:
                 self._listing = False
-                self.status.set_text(self.tr("Source access failed."))
+                # 技術詳細を出さず、案内の一文だけを示す。
+                self.status.set_text(self.tr(
+                    "Personal sources are unavailable. Set up GNOME Online Accounts first."))
                 for kind in SourceKind:
                     self._registry_failure(kind, EDSState.COMMUNICATION_ERROR)
                 return

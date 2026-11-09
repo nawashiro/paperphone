@@ -614,6 +614,20 @@ class ApplicationViewTests(unittest.TestCase):
         self.assertEqual(len(view.source_checks), count)
         self.assertTrue(view.contacts.checkbox_for(self.contact.key).get_active())
 
+    def test_missing_eds_services_show_one_short_guidance(self):
+        class NoBus(Services):
+            def connect(self, callback):
+                callback(False)
+
+        self.services = NoBus()
+        view = self.view()
+        text = view.status.get_text()
+        self.assertEqual(len(text.strip().splitlines()), 1)
+        self.assertIn("GNOME Online Accounts", text)
+        # 技術詳細（D-Bus名・例外本文）は表示しない。
+        self.assertNotIn("D-Bus", text)
+        self.assertEqual(view.pending_exclusions(), ())
+
     def test_source_state_words_and_auto_listing_inside_sources_dialog(self):
         self.available()
         self.services.results[SourceKind.TASK_LIST] = (EDSState.AUTHENTICATION_REQUIRED, ())

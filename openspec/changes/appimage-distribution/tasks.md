@@ -8,14 +8,14 @@
 
 ## 2. 実行時の接続と案内
 
-- [ ] 2.1 ホストEDSのD-Busサービス不在を短い案内に分類し、技術詳細を主画面に出さない。テスト: サービス不在を模擬した環境での表示を確認する。
+- [x] 2.1 ホストEDSのD-Busサービス不在を短い案内に分類し、技術詳細を主画面に出さない。テスト: サービス不在を模擬した環境での表示を確認する。
 - [ ] 2.2 既存の位置ポータル・保存・印刷経路がAppImage実行で機能することを、ホストセッションで確認する（実確認の記録を残す）。
 
 ## 3. 配布文書の整備
 
-- [ ] 3.1 `distribution-plan.md` をAppImage基準に書き替え、ビルド手順への参照とクリーン環境試験項目を更新する。確認: 手順どおりにスクリプト・試験が実行できる。
-- [ ] 3.2 `docs/gnome-dependencies.md` のFlatpak節をAppImage構成に置換する。確認: 记載の機能一覧と1.2の検査対象が一致する。
-- [ ] 3.3 `openspec/changes/migrate-to-gnome/tasks.md` 8.3 のFlatpak再試験項目を削除し、AppImageのクリーン環境試験への置換を記す。確認: 残存タスクにFlatpak前提が無い。
+- [x] 3.1 `distribution-plan.md` をAppImage基準に書き替え、ビルド手順への参照とクリーン環境試験項目を更新する。確認: 手順どおりにスクリプト・試験が実行できる。
+- [x] 3.2 `docs/gnome-dependencies.md` のFlatpak節をAppImage構成に置換する。確認: 记載の機能一覧と1.2の検査対象が一致する。
+- [x] 3.3 `openspec/changes/migrate-to-gnome/tasks.md` 8.3 のFlatpak再試験項目を削除し、AppImageのクリーン環境試験への置換を記す。確認: 残存タスクにFlatpak前提が無い。
 
 ## 4. 検証
 
