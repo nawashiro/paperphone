@@ -168,27 +168,26 @@ class ApplicationView(Gtk.Box):
         self._timer = None
 
         header = Adw.HeaderBar()
-        self.settings_button = self._button("Settings", lambda _b: self.stack.set_visible_child_name("settings"))
+        self.sources_button = self._button("Sources", lambda _b: self._show_sources_dialog())
+        header.pack_start(self.sources_button)
+        self.settings_button = self._button("Settings", lambda _b: self._show_settings_dialog())
         header.pack_end(self.settings_button)
         self.toolbar.add_top_bar(header)
-        body = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-        self.stack = Gtk.Stack(vexpand=True, hexpand=True)
-        sidebar = Gtk.StackSidebar(stack=self.stack)
-        navigation = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        navigation.append(sidebar)
-        navigation.append(self.stack)
         self.status = self._label("")
         self.status.set_visible(False)
         self.progress = Gtk.ProgressBar()
         self.progress.set_visible(False)
+        body = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         body.append(self.status)
         body.append(self.progress)
-        body.append(navigation)
-        self.generate_button = self._button("Generate booklet", lambda _b: self.generate())
-        self.generate_button.add_css_class("suggested-action")
-        body.append(self.generate_button)
+        self.main = Gtk.ScrolledWindow(vexpand=True, hscrollbar_policy=Gtk.PolicyType.NEVER)
+        flow = self._box()
+        self.main.set_child(flow)
+        self._flow = flow
+        body.append(self.main)
         self.toolbar.set_content(body)
-        self._page_titles = {}
+        self._section_headers = []
+
         settings = self._box()
         self.language_dropdown = Gtk.DropDown.new_from_strings(["English", "日本語"])
         self.language_dropdown.set_selected(1 if self.language == "ja" else 0)
@@ -208,7 +207,7 @@ class ApplicationView(Gtk.Box):
         settings.append(self.apply_contact_button)
         self.delete_data_button = self._button("Delete stored map data", self._delete_map_data)
         settings.append(self.delete_data_button)
-        self._add_page(settings, "settings", "Settings")
+        self.settings_dialog = self._dialog("Settings", settings)
 
         sources = self._box()
         sources.append(self._label(MESSAGES[11]))
@@ -225,64 +224,16 @@ class ApplicationView(Gtk.Box):
         self.source_box.update_property([Gtk.AccessibleProperty.LABEL],
                                         [self.tr("Sources")])
         sources.append(self.source_box)
-        self._add_page(sources, "sources", "Sources")
+        self.sources_dialog = self._dialog("Sources", sources)
 
-        contacts_page = self._box()
-        self.contacts = ContactSelectionView(self.selection)
-        self.contacts.set_size_request(-1, 200)
-        contacts_page.append(self.contacts)
-        self._add_page(contacts_page, "contacts", "Contacts")
-
-        calendar_page = self._box()
-        self.calendar_box = self._box()
-        self.calendar_box.update_property([Gtk.AccessibleProperty.LABEL],
-                                          [self.tr("Calendar")])
-        calendar_page.append(self.calendar_box)
-        self._add_page(calendar_page, "calendar", "Calendar")
-
-        tasks_page = self._box()
-        self.todos = TodoSelectionView(self.selection)
-        self.todos.set_size_request(-1, 260)
-        tasks_page.append(self.todos)
-        self._add_page(tasks_page, "tasks", "Tasks")
-
-        weather = self._box()
-        self.weather_box = self._box()
-        weather.append(self.weather_box)
-        weather.append(Gtk.Label(label=ATTRIBUTION_SHORT, wrap=True, xalign=0))
-        self._add_page(weather, "weather", "Weather")
-
-        maps = self._box()
-        self.region = region_factory(services.store)
-        self.places = place_factory()
-        self.region.extract_listener = self._region_changed
-        self.region.prefecture.connect("notify::selected", self._prefecture_changed)
-        maps.append(self.region)
-        maps.append(self.places)
-        self.map_failure = Gtk.Label(wrap=True, xalign=0)
-        maps.append(self.map_failure)
-        for label in self.places.chosen_labels.values():
-            label.connect("notify::label", self._endpoints_changed)
-        self._add_page(maps, "map", "Walking map")
-
-        self.assets = asset_factory()
-        self.assets.status.connect("notify::label", self._photo_changed)
-        self.assets.notes_checkbox.connect("toggled", self._edited)
-        self.assets.contactless_checkbox.connect("toggled", self._edited)
-        self.assets.paper_app_dropdown.connect("notify::selected", self._edited)
-        photos_page = self._box()
-        photos_page.append(self.assets)
-        self._add_page(photos_page, "photos", "Photos")
-
-        apps_page = self._box()
-        apps_page.append(self.assets.paper_box)
-        self._add_page(apps_page, "apps", "Paper apps")
-        if output_factory is None:
-            from .pdf_output import PdfOutputView
-            output_factory = PdfOutputView
-        self.output = output_factory()
-        self._add_page(self.output, "pdf", "PDF")
-        self.stack.set_visible_child_name("sources")
+        self._section("Contacts", self._contact_section())
+        self._section("Calendar", self._calendar_section())
+        self._section("Tasks", self._task_section())
+        self._section("Weather", self._weather_section())
+        self._section("Walking map", self._map_section(region_factory, place_factory))
+        self._section("Photos", self._photo_section(asset_factory))
+        self._section("Paper apps", self._paper_app_section())
+        self._section("PDF", self._output_section(output_factory))
         self._capture_static_labels()
         self.set_language(self.language)
         self._load_persisted_settings()
@@ -323,15 +274,116 @@ class ApplicationView(Gtk.Box):
         box.append(label)
         box.append(entry)
 
-    def _add_page(self, child, name, title):
-        scroller = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER)
+    def _contact_section(self):
+        box = self._box()
+        box.append(self._label("Contacts"))
+        self.contacts = ContactSelectionView(self.selection)
+        self.contacts.set_size_request(-1, 200)
+        box.append(self.contacts)
+        return box
+
+    def _calendar_section(self):
+        box = self._box()
+        self.calendar_box = self._box()
+        self.calendar_box.update_property([Gtk.AccessibleProperty.LABEL],
+                                          [self.tr("Calendar")])
+        box.append(self.calendar_box)
+        return box
+
+    def _task_section(self):
+        box = self._box()
+        self.todos = TodoSelectionView(self.selection)
+        self.todos.set_size_request(-1, 260)
+        box.append(self.todos)
+        return box
+
+    def _weather_section(self):
+        box = self._box()
+        self.weather_box = self._box()
+        box.append(self.weather_box)
+        box.append(Gtk.Label(label=ATTRIBUTION_SHORT, wrap=True, xalign=0))
+        return box
+
+    def _map_section(self, region_factory, place_factory):
+        box = self._box()
+        self.region = region_factory(self.services.store)
+        self.places = place_factory()
+        self.region.extract_listener = self._region_changed
+        self.region.prefecture.connect("notify::selected", self._prefecture_changed)
+        box.append(self.region)
+        box.append(self.places)
+        self.map_failure = Gtk.Label(wrap=True, xalign=0)
+        box.append(self.map_failure)
+        for label in self.places.chosen_labels.values():
+            label.connect("notify::label", self._endpoints_changed)
+        return box
+
+    def _photo_section(self, asset_factory):
+        self.assets = asset_factory()
+        self.assets.status.connect("notify::label", self._photo_changed)
+        self.assets.notes_checkbox.connect("toggled", self._edited)
+        self.assets.contactless_checkbox.connect("toggled", self._edited)
+        self.assets.paper_app_dropdown.connect("notify::selected", self._edited)
+        box = self._box()
+        box.append(self.assets)
+        return box
+
+    def _paper_app_section(self):
+        box = self._box()
+        box.append(self.assets.paper_box)
+        return box
+
+    def _output_section(self, output_factory):
+        if output_factory is None:
+            from .pdf_output import PdfOutputView
+            output_factory = PdfOutputView
+        self.output = output_factory()
+        box = self._box()
+        self.generate_button = self._button("Generate booklet", lambda _b: self.generate())
+        self.generate_button.add_css_class("suggested-action")
+        box.append(self.generate_button)
+        box.append(self.output)
+        return box
+
+    def _dialog(self, title, child):
         child.set_margin_top(12)
         child.set_margin_bottom(12)
         child.set_margin_start(18)
         child.set_margin_end(18)
-        scroller.set_child(child)
-        page = self.stack.add_titled(scroller, name, self.tr(title))
-        self._page_titles[name] = (page, title)
+        dialog = Adw.Dialog()
+        dialog.set_title(self.tr(title))
+        dialog.set_child(child)
+        return dialog
+
+    def _show_settings_dialog(self):
+        self.settings_dialog.present(self.get_root())
+
+    def _show_sources_dialog(self):
+        self.sources_dialog.present(self.get_root())
+
+    def _reveal_section(self, title):
+        for widget, message in self._section_headers:
+            if message == title:
+                widget.set_active(True)
+
+    def _section(self, title, child):
+        child.set_margin_top(12)
+        child.set_margin_bottom(12)
+        child.set_margin_start(18)
+        child.set_margin_end(18)
+        revealer = Gtk.Revealer()
+        revealer.set_child(child)
+        revealer.set_transition_type(Gtk.RevealerTransitionType.NONE)
+        revealer.set_reveal_child(True)
+        toggle = Gtk.ToggleButton()
+        toggle.set_label(self.tr(title))
+        toggle.set_active(True)
+        toggle.connect("toggled", lambda b, r=revealer: r.set_reveal_child(b.get_active()))
+        self._section_headers.append((toggle, title))
+        block = self._box()
+        block.append(toggle)
+        block.append(revealer)
+        self._flow.append(block)
 
     def _capture_static_labels(self, root=None):
         # 既存子ビューの静的ラベルだけを記録。個人データ行は後で生成される。
@@ -339,9 +391,13 @@ class ApplicationView(Gtk.Box):
         catalog = getattr(getattr(ja, "__self__", None), "_catalog", {})
         self._reverse_labels = {value: key for key, value in catalog.items()
                                 if isinstance(key, str) and isinstance(value, str) and key}
-        for widget in _children(root if root is not None else self):
-            if isinstance(widget, Gtk.Label) and widget is not getattr(self.output, "warnings", None):
-                self._static_bindings.append(widget)
+        widgets = [root if root is not None else self,
+                   *([] if root is not None else (self.settings_dialog, self.sources_dialog))]
+        for widget in widgets:
+            for descendant in _children(widget):
+                if (isinstance(descendant, Gtk.Label)
+                        and descendant is not getattr(self.output, "warnings", None)):
+                    self._static_bindings.append(descendant)
 
     def set_language(self, language):
         self._translating = True
@@ -364,8 +420,10 @@ class ApplicationView(Gtk.Box):
         for view in (self.assets, self.region, self.todos, self.output):
             if hasattr(view, "retranslate"):
                 view.retranslate()
-        for page, message in self._page_titles.values():
-            page.set_title(self.tr(message))
+        for widget, message in self._section_headers:
+            widget.set_label(self.tr(message))
+        self.settings_dialog.set_title(self.tr("Settings"))
+        self.sources_dialog.set_title(self.tr("Sources"))
         self.name_entry.update_property([Gtk.AccessibleProperty.LABEL], [self.tr("Name on cover")])
         self.contact_entry.update_property([Gtk.AccessibleProperty.LABEL], [self.tr("MET Norway client contact")])
         for item in getattr(self, "_calendar_items", ()):
@@ -896,6 +954,7 @@ class ApplicationView(Gtk.Box):
         token = self._generation
         self._generating = True
         self.generate_button.set_sensitive(False)
+        self.progress.set_visible(True)
         self._generation_progresspulse = GLib.timeout_add(150, self._pulse_generation_progress)
         map_key = (request.extract, request.departure, request.destination)
 
@@ -936,7 +995,7 @@ class ApplicationView(Gtk.Box):
                     self.map_failure.set_text(self.tr("Map failure: {reason}").format(
                         reason=self.tr(ROUTE_REASONS.get(reason, ROUTE_REASONS["route-failed"]))))
                 self.status.set_text(self.tr("Walking map failed. The map is not included."))
-                self.stack.set_visible_child_name("map")
+                self._reveal_section("Walking map")
             else:
                 self.status.set_text(self.tr("Generation failed. Your previous PDF has been kept."))
             return
@@ -946,7 +1005,7 @@ class ApplicationView(Gtk.Box):
             self.status.set_text(self.tr("Generation failed. Your previous PDF has been kept."))
             return
         self.status.set_text(self.tr("Booklet ready. Later edits do not change this PDF."))
-        self.stack.set_visible_child_name("pdf")
+        self._reveal_section("PDF")
 
     def refresh_clock(self):
         zone = self.services.timezone()

@@ -561,6 +561,106 @@ class ApplicationViewTests(unittest.TestCase):
         factory.assert_called_once_with(self.services)
         self.assertEqual(self.services.calls, [])  # 実ビューでなければ列挙も発生しない。
 
+    def descendants(self, widget):
+        from paperphone.application_view import _children
+        for descendant in _children(widget):
+            yield descendant
+            yield from self.descendants(descendant)
+
+    def test_main_screen_is_a_single_content_flow_without_stack(self):
+        view = self.view()
+        self.assertFalse(hasattr(view, "stack"))
+        self.assertFalse(hasattr(view, "sidebar"))
+        flow = list(self.descendants(view.main.get_child()))
+        self.assertEqual([message for _, message in view._section_headers],
+                         ["Contacts", "Calendar", "Tasks", "Weather", "Walking map",
+                          "Photos", "Paper apps", "PDF"])
+        self.assertIn(view.output, flow)
+        self.assertIn(view.generate_button, flow)
+
+    def test_section_fold_keeps_selection_and_generate_usable(self):
+        self.available()
+        view = self.view()
+        self.sources(view)
+        contacts_toggle = view._section_headers[0][0]
+        output_toggle = view._section_headers[7][0]
+        contacts_toggle.set_active(False)
+        output_toggle.set_active(False)
+        view.contacts.checkbox_for(self.contact.key).set_active(True)
+        self.assertTrue(view.contacts.checkbox_for(self.contact.key).get_sensitive())
+        self.assertTrue(view.generate())
+        self.assertEqual(view.services.requests[-1].snapshot.items[0].category, "contacts")
+        contacts_toggle.set_active(True)
+        output_toggle.set_active(True)
+        self.assertTrue(view.contacts.checkbox_for(self.contact.key).get_active())
+
+    def test_sources_and_settings_live_in_header_dialogs(self):
+        self.available()
+        view = self.view()
+        self.sources(view)
+        dialog_all = list(self.descendants(view.sources_dialog.get_child()))
+        self.assertIn(view.refresh_button, dialog_all)
+        self.assertIn(view.source_box, dialog_all)
+        settings_all = list(self.descendants(view.settings_dialog.get_child()))
+        self.assertIn(view.name_entry, settings_all)
+        self.assertIn(view.contact_entry, settings_all)
+        self.assertIn(view.language_dropdown, settings_all)
+        self.assertIn(view.apply_contact_button, settings_all)
+        view.contacts.checkbox_for(self.contact.key).set_active(True)
+        # ダイアログを閉じても主画面の選択状態と列挙状態はそのまま。
+        count = len(view.source_checks)
+        view.sources_dialog.force_close()
+        view.sources_dialog.present(None)
+        self.assertEqual(len(view.source_checks), count)
+        self.assertTrue(view.contacts.checkbox_for(self.contact.key).get_active())
+
+    def test_source_state_words_and_auto_listing_inside_sources_dialog(self):
+        self.available()
+        self.services.results[SourceKind.TASK_LIST] = (EDSState.AUTHENTICATION_REQUIRED, ())
+        view = self.view()
+        self.sources(view)
+        from paperphone.application_view import _children
+        self.assertIn(view.source_box, _children(view.sources_dialog.get_child()))
+        failed_key = (SourceKind.TASK_LIST, "TASK_LIST")
+        self.assertIn("Failed.", view.source_status[failed_key].get_text())
+        ok_key = (SourceKind.ADDRESS_BOOK, "ADDRESS_BOOK")
+        self.assertEqual(view.source_status[ok_key].get_text(), "OK")
+
+    def test_generation_progress_and_failure_share_the_output_panel(self):
+        self.available()
+        jobs, updates = [], []
+        view = self.view(submit=jobs.append)
+        view._dispatch = updates.append
+        self.assertTrue(view.generate())
+        self.assertTrue(view.progress.get_visible())
+        self.assertFalse(view.generate())  # 生成中は排他で受けない。
+        view.services.generate_impl = Mock(side_effect=GenerationFailure("booklet", "render-failed"))
+        jobs.pop()()
+        updates.pop()()
+        self.assertIn("Generation failed.", view.status.get_text())
+        self.assertIn(view.output, list(self.descendants(view.main.get_child())))
+
+    def test_booklet_preview_updates_on_new_generation(self):
+        self.services.generate_impl = generate_booklet
+        self.available()
+        view = self.view()
+        self.sources(view)
+        view.name_entry.set_text("First")
+        self.assertTrue(view.generate())
+        first = view.output.pdf_bytes
+        view.contacts.checkbox_for(self.contact.key).set_active(True)
+        self.assertTrue(view.generate())
+        self.assertNotEqual(view.output.pdf_bytes, first)
+        self.assertEqual(view.services.requests[-1].snapshot.items[0].category, "contacts")
+
+    def test_message_catalog_covers_every_english_string(self):
+        from paperphone.application_view import MESSAGES, STATE_MESSAGES
+        ja = gettext_for("ja")
+        self.assertEqual(len(set(MESSAGES)), len(MESSAGES))
+        missing = [message for message in set(MESSAGES) | set(STATE_MESSAGES.values())
+                   if ja(message) == message]
+        self.assertEqual(missing, [])
+
     def test_close_discards_late_generation_result(self):
         jobs, updates = [], []
         view = self.view(submit=jobs.append)

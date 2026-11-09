@@ -226,11 +226,11 @@ msgstr "利用できなくなった項目は選択から外しました。"
 
 #: src/paperphone/application_view.py:44
 msgid "Calendar"
-msgstr "Calendar"
+msgstr "予定"
 
 #: src/paperphone/application_view.py:44
 msgid "Tasks"
-msgstr "Tasks"
+msgstr "タスク"
 
 #: src/paperphone/application_view.py:44
 msgid "Weather"
@@ -242,7 +242,7 @@ msgstr "徒歩地図"
 
 #: src/paperphone/application_view.py:45
 msgid "Photos"
-msgstr "Photos"
+msgstr "写真"
 
 #: src/paperphone/application_view.py:45
 msgid "Paper apps"
@@ -250,7 +250,7 @@ msgstr "紙アプリ"
 
 #: src/paperphone/application_view.py:45
 msgid "PDF"
-msgstr "PDF"
+msgstr "冊子"
 
 #: src/paperphone/application_view.py:46
 msgid "Generate booklet"
