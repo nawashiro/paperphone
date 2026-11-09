@@ -17,7 +17,11 @@ import tempfile
 from .places import Place, PlaceIndex
 from .walking import _bounds, _scan_pedestrian, WalkingError, WalkingRouter
 
-DERIVED_VERSION = 1
+DERIVED_VERSION = 2
+
+# 印刷で判別できないずれの上限（Web Mercatorメートル）。紙面縮尺が一枚ごとに
+# 決まるため簡素化の許容値は1段階で足りる。
+SIMPLIFY_TOLERANCE_M = 1.0
 
 _REASONS = frozenset({"invalid-input", "invalid-data", "unavailable", "cancelled"})
 
@@ -56,7 +60,8 @@ CREATE VIRTUAL TABLE map_area_bounds USING rtree(id, west, east, south, north);
 CREATE TABLE map_areas(id INTEGER PRIMARY KEY, kind TEXT NOT NULL, rings BLOB NOT NULL);
 CREATE VIRTUAL TABLE map_road_bounds USING rtree(id, west, east, south, north);
 CREATE TABLE map_roads(id INTEGER PRIMARY KEY, road_class TEXT NOT NULL, points BLOB NOT NULL);
-CREATE TABLE map_labels(name TEXT NOT NULL, x REAL NOT NULL, y REAL NOT NULL);
+CREATE TABLE map_labels(name TEXT NOT NULL, x REAL NOT NULL, y REAL NOT NULL,
+    importance INTEGER NOT NULL);
 CREATE INDEX map_labels_position ON map_labels(x, y);
 """
 
@@ -87,6 +92,97 @@ def _unpack_paths(blob):
         offset += 16 * size
         paths.append(tuple(zip(values[::2], values[1::2])))
     return tuple(paths)
+
+
+# 地名ラベルの重要度。大きいほど先に描き、重なりで省かれにくい。
+# populationタグはデータ欠落が多いため読まず、発生源タグだけから決める。
+_PLACE_IMPORTANCE = {"city": 240, "town": 210, "village": 170, "suburb": 150, "hamlet": 130}
+
+
+def _label_importance(tags):
+    if tags.get("place") in _PLACE_IMPORTANCE:
+        return _PLACE_IMPORTANCE[tags["place"]]
+    railway = tags.get("railway", "")
+    if railway == "station":
+        return 220
+    if railway == "halt":
+        return 140
+    if tags.get("amenity"):
+        return 120
+    if tags.get("tourism"):
+        return 100
+    return 80
+
+
+def _chain_roads(roads):
+    """同じroad_classのwayを、端点が一致する連鎖ごとに1レコードへ統合する。
+
+    3本以上が一点に集まる分岐・交差点では連鎖を分け、閉じた連鎖は1レコードに
+    まとめる。座標は連鎖の出現順に連ねる。
+    """
+    merged = []
+    by_class = {}
+    for item in roads:
+        by_class.setdefault(item[0], []).append(item)
+    for road_class, members in by_class.items():
+        paths = [list(member[1][0]) for member in members]
+        starts, ends = {}, {}
+        for index, points in enumerate(paths):
+            starts.setdefault(points[0], []).append(index)
+            ends.setdefault(points[-1], []).append(index)
+        consumed = [False] * len(paths)
+        bounds = [member[2:] for member in members]
+
+        def joins(point):
+            """一点に集まる同種別が2本のときだけ連鎖を続ける。3本は分岐で止める。"""
+            forward = [i for i in starts.get(point, []) if not consumed[i]]
+            backward = [j for j in ends.get(point, []) if not consumed[j]]
+            incident = len(starts.get(point, [])) + len(ends.get(point, []))
+            return forward, backward, incident
+
+        for index in range(len(paths)):
+            if consumed[index]:
+                continue
+            consumed[index] = True
+            points = list(paths[index])
+            box = list(bounds[index])
+            for side in ("end", "start"):
+                while True:
+                    tip = points[-1] if side == "end" else points[0]
+                    forward, backward, incident = joins(tip)
+                    if side == "start":
+                        forward, backward = backward, forward
+                    candidates = [(i, False) for i in forward] + [(j, True) for j in backward]
+                    if incident != 2 or len(candidates) != 1:
+                        break
+                    target, reverse = candidates[0]
+                    consumed[target] = True
+                    tail = list(reversed(paths[target])) if reverse else paths[target]
+                    if side == "end":
+                        points.extend(tail[1:])
+                    else:
+                        points[:0] = tail[:-1]
+                    other = bounds[target]
+                    box = [min(box[0], other[0]), min(box[1], other[1]),
+                           max(box[2], other[2]), max(box[3], other[3])]
+            merged.append((road_class, [points], *box))
+    return merged
+
+
+def _simplify_path(coordinates):
+    """Douglas–Peuckerで印刷に判別できない点を捨てる。壊れたら元座標を返す。"""
+    from shapely.geometry import LineString
+
+    if len(coordinates) < 3:
+        return coordinates
+    try:
+        simplified = LineString(coordinates).simplify(SIMPLIFY_TOLERANCE_M,
+                                                      preserve_topology=False)
+    except (ValueError, TypeError, RuntimeError):
+        return coordinates
+    if simplified.is_empty or not simplified.is_valid or len(simplified.coords) < 2:
+        return coordinates
+    return list(simplified.coords)
 
 
 def _scan_places_and_features(extract_path, *, cancelled=None):
@@ -127,7 +223,7 @@ def _scan_places_and_features(extract_path, *, cancelled=None):
         name = tags.get("name") or tags.get("name:ja") or tags.get("name:en")
         if name:
             point = projected.representative_point()
-            labels.append((name, point.x, point.y))
+            labels.append((name, point.x, point.y, _label_importance(tags)))
 
     class Handler(osmium.SimpleHandler):
         def node(self, node):
@@ -144,7 +240,7 @@ def _scan_places_and_features(extract_path, *, cancelled=None):
             name = node.tags.get("name") or node.tags.get("name:ja") or node.tags.get("name:en")
             if name and any(node.tags.get(key) for key in ("place", "amenity", "tourism", "railway")):
                 px, py = project(*point)
-                labels.append((name, px, py))
+                labels.append((name, px, py, _label_importance(node.tags)))
 
         def way(self, way):
             check_cancelled()
@@ -208,6 +304,12 @@ def _scan_places_and_features(extract_path, *, cancelled=None):
                 label(area.tags, projected)
 
     Handler().apply_file(os.fspath(extract_path), locations=True, idx="flex_mem")
+    # 構築時の後処理: 連鎖統合と簡素化。走査の追加はしない。
+    roads = _chain_roads(roads)
+    areas = [(kind, [_simplify_path(ring) for ring in rings], west, south, east, north)
+             for kind, rings, west, south, east, north in areas]
+    roads = [(road_class, [_simplify_path(path) for path in paths], west, south, east, north)
+             for road_class, paths, west, south, east, north in roads]
     return places, areas, roads, labels
 
 
@@ -239,7 +341,8 @@ def _write_derived(db, prefecture, sha256, places, areas, roads, labels, nodes, 
                    (index, road_class, _pack_paths(coordinates)))
         db.execute("INSERT INTO map_road_bounds VALUES (?, ?, ?, ?, ?)",
                    (index, west, east, south, north))
-    db.executemany("INSERT INTO map_labels VALUES (?, ?, ?)", labels)
+    db.executemany("INSERT INTO map_labels (name, x, y, importance) VALUES (?, ?, ?, ?)",
+                   labels)
 
 
 def build_derived(extract_path, prefecture: int, sha256: str, *, directory,
@@ -405,7 +508,8 @@ class DerivedStore:
                 " WHERE b.west <= ? AND b.east >= ? AND b.south <= ? AND b.north >= ?",
                 (east, west, north, south)).fetchall()
             labels = self._db.execute(
-                "SELECT name, x, y FROM map_labels WHERE x BETWEEN ? AND ? AND y BETWEEN ? AND ?",
+                "SELECT name, x, y FROM map_labels WHERE x BETWEEN ? AND ? AND y BETWEEN ? AND ?"
+                " ORDER BY importance DESC",
                 (west, east, south, north)).fetchall()
         except sqlite3.Error:
             raise WalkingError("invalid-data") from None

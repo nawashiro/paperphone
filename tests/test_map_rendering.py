@@ -196,6 +196,27 @@ class MapRenderingTests(unittest.TestCase):
             self.assertNotIn(removed, text)
         self.assertNotIn('2026-11-07', text)
 
+    def test_important_labels_survive_label_overlap(self):
+        from tests.test_osm_derived import SHA, walking_xml
+        nodes = {60: (34.9996, 138.9996), 61: (34.9996, 138.9996)}
+        values = {60: {"place": "city", "name": "Important 重要な町"},
+                  61: {"place": "hamlet", "name": "Background 背景の地名"}}
+        text = walking_xml(nodes, [], node_tags=values)
+        source = self.directory / 'overlap.osm'
+        source.write_text(text, encoding='utf-8')
+        sha = 'f' * 64
+        build_derived(source, 13, sha, directory=self.directory)
+        with patch.object(socket, 'socket', side_effect=AssertionError('network forbidden')):
+            sheet = replace(self.sheet, source_sha256=sha,
+                            source_path=derived_path(13, sha, directory=self.directory))
+            result, pdf = self.pdf(sheet)
+        self.assertIsNone(result.error)
+        target = self.directory / 'overlap.pdf'
+        target.write_bytes(pdf)
+        text = Poppler.Document.new_from_file(target.as_uri(), None).get_page(0).get_text()
+        self.assertIn('重要な町', text)
+        self.assertNotIn('背景の地名', text)
+
     def test_tiny_rectangle_explicitly_reports_overflow_before_source_read(self):
         with patch('paperphone.map_rendering._read_features', side_effect=AssertionError('not reached')):
             for width, height in ((8, 8), (550, 35), (0, 50), (float('nan'), 200)):

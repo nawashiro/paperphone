@@ -66,7 +66,7 @@ class DerivedStoreTests(unittest.TestCase):
         self.assertTrue(path.is_file())
         with sqlite3.connect(str(path)) as db:
             meta = dict(db.execute("SELECT key, value FROM meta").fetchall())
-        self.assertEqual(meta["version"], "1")
+        self.assertEqual(meta["version"], "2")
         self.assertEqual(meta["prefecture"], "13")
         self.assertEqual(meta["sha256"], SHA)
         with self.open() as store:
@@ -93,6 +93,117 @@ class DerivedStoreTests(unittest.TestCase):
         with sqlite3.connect(str(path)) as db:
             db.execute("UPDATE meta SET value = '99' WHERE key = 'version'")
         self.assertIsNone(self.open())
+
+    def map_features(self, store):
+        from paperphone.map_rendering import project
+        px0, py0 = project(34.999, 138.999)
+        px1, py1 = project(35.001, 139.006)
+        return store.map_features((px0, py0, px1, py1))
+
+    def test_chains_same_class_ways_and_keeps_junctions_apart(self):
+        from paperphone.map_rendering import project
+        nodes = {1: (35, 139), 2: (35.0001, 139), 3: (35.0001, 139.0001), 4: (35, 139.0001),
+                 5: (35.0002, 139.0001), 6: (35.0002, 139.0002)}
+        ways = [(1, [1, 2], {"highway": "residential"}),
+                (2, [2, 3], {"highway": "residential"}),
+                (3, [3, 4], {"highway": "residential"}),
+                (4, [5, 6], {"highway": "primary"}),
+                (5, [6, 6, 5], {"highway": "service"})]
+        self.build(walking_xml(nodes, ways))
+        with self.open() as store:
+            _, roads, _ = self.map_features(store)
+        self.assertEqual(sorted(road_class for road_class, _ in roads),
+                         ["primary", "residential", "service"])
+        residential = next(points for kind, [points] in roads if kind == "residential")
+        self.assertEqual(len(residential), 4)
+        self.assertIn(project(35.0001, 139), residential)
+
+    def test_chain_extends_through_shared_endpoint(self):
+        from paperphone.map_rendering import project
+        nodes = {1: (35, 139), 2: (35.0001, 139), 3: (35.0001, 139.0001)}
+        ways = [(1, [2, 1], {"highway": "residential"}),
+                (2, [2, 3], {"highway": "residential"})]
+        self.build(walking_xml(nodes, ways))
+        with self.open() as store:
+            _, roads, _ = self.map_features(store)
+        self.assertEqual(len(roads), 1)
+        points = roads[0][1][0]
+        self.assertEqual(points[0], project(35.0001, 139.0001))
+
+    def test_chains_do_not_merge_at_branching_points(self):
+        nodes = {1: (35, 139), 2: (35.0001, 139),
+                 3: (35.0001, 139.0001), 4: (35, 139.0001)}
+        ways = [(1, [1, 2], {"highway": "residential"}),
+                (2, [2, 3], {"highway": "residential"}),
+                (3, [2, 4], {"highway": "residential"})]
+        self.build(walking_xml(nodes, ways))
+        with self.open() as store:
+            _, roads, _ = self.map_features(store)
+        self.assertEqual(len(roads), 3)
+
+    def test_closed_chains_store_one_record(self):
+        nodes = {1: (35, 139), 2: (35.0001, 139), 3: (35.00005, 139.0001)}
+        ways = [(1, [1, 2], {"highway": "residential"}),
+                (2, [2, 3, 1], {"highway": "residential"})]
+        self.build(walking_xml(nodes, ways))
+        with self.open() as store:
+            _, roads, _ = self.map_features(store)
+        self.assertEqual(len(roads), 1)
+        points = roads[0][1][0]
+        self.assertEqual(points[0], points[-1])
+
+    def test_simplify_discards_print_invisible_points(self):
+        from paperphone.osm_derived import SIMPLIFY_TOLERANCE_M, _simplify_path
+        from shapely.geometry import LineString, Point
+        line = [(0.0, 0.0), (0.01, 0.0000001), (0.02, 0.0), (0.03, 0.0000002), (0.04, 0.0)]
+        simplified = _simplify_path(line)
+        self.assertLess(len(simplified), len(line))
+        self.assertEqual(simplified[0], line[0])
+        self.assertEqual(simplified[-1], line[-1])
+        distance = max(Point(*point).distance(LineString(simplified)) for point in line)
+        self.assertLessEqual(distance, SIMPLIFY_TOLERANCE_M)
+
+    def test_invalid_simplification_keeps_original_geometry(self):
+        from unittest.mock import patch
+        from paperphone.osm_derived import _simplify_path
+        source = [(0.0, 0.0), (1.0, 1.0), (2.0, 0.0)]
+        broken = type("Broken", (), {"is_empty": False, "is_valid": False,
+                                     "coords": ()})()
+        with patch("shapely.geometry.LineString.simplify", return_value=broken):
+            self.assertEqual(_simplify_path(source), source)
+
+    def test_scan_pass_count_does_not_grow(self):
+        import osmium as osmium_module
+        original = osmium_module.SimpleHandler.apply_file
+        calls = []
+
+        def counting(self, *args, **kwargs):
+            calls.append(args)
+            return original(self, *args, **kwargs)
+
+        text = walking_xml({1: (35, 139), 2: (35.0001, 139)},
+                           [(1, [1, 2], {"highway": "footway"})])
+        source = self.root / "fixture-count.osm"
+        source.write_text(text, encoding="utf-8")
+        with mock.patch.object(osmium_module.SimpleHandler, "apply_file", new=counting):
+            build_derived(source, 13, "e" * 64, directory=self.root)
+        self.assertEqual(len(calls), 3)
+
+    def test_label_importance_follows_source_tags(self):
+        values = ((1, {"place": "city", "name": "City"}),
+                  (2, {"place": "hamlet", "name": "Hamlet"}),
+                  (3, {"railway": "station", "name": "Station"}),
+                  (4, {"amenity": "library", "name": "Library"}),
+                  (5, {"tourism": "hotel", "name": "Hotel"}))
+        nodes = {node_id: (35, 139 + node_id * 0.001) for node_id, _ in values}
+        self.build(walking_xml(nodes, [], node_tags=dict(values)))
+        with self.open() as store:
+            _, _, labels = self.map_features(store)
+        order = {name: index for index, (name, _, _) in enumerate(labels)}
+        self.assertLess(order["City"], order["Station"])
+        self.assertLess(order["Station"], order["Hamlet"])
+        self.assertLess(order["Hamlet"], order["Library"])
+        self.assertLess(order["Library"], order["Hotel"])
 
     def test_places_catalog_query_matches_saved_rows(self):
         text = walking_xml(
