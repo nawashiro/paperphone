@@ -1,21 +1,24 @@
-# 配布整備の草案（タスク8.3）
+# 配布整備の記録（タスク8.3）
 
 ## 現時点の状態
 
 配布形式はAppImageに決めた。Flatpakは配布候補から外し、ポータルの権限探求は配布要件から外した。既存の実績は[Flatpak EDS検証](<flatpak-eds-validation.md>)（EDS接続の参考記録）と[保存・印刷検証](<save-print-validation.md>)を参照。配布の成立そのものは書いていない。
 
-## 暫定アプリID
+## 確定事項（2026-11-10、利用者の決定）
 
-現在の[main.py](<../../src/paperphone/main.py>)の`com.withgoogle.experiments.unplugged`は暫定値であり、上流のAndroid IDとは意図的に一致しない。製品IDの決定は利用者の判断であり、このセッションでは確定しない。ID未確定のため、desktopファイルやAppStreamの識別子も暫定のまま残す。
+- アプリID: `dev.nawashiro.paperphone`。`src/paperphone/main.py`の`APPLICATION_ID`と、desktop・metainfo・アイコンの識別子。
+- 連絡先: `nawashiro@nawashiro.dev`。AppStreamの`update_contact`に格納した。MET Norway用の連絡先はアプリ設定で入れる項目のまま。
+- 配布は当面しない。自動更新は作らない（AppImageUpdate等は後続判断）。
 
-## 雛形
+## 整備済みのファイル
 
-- desktopファイル: [paperphone.desktop.draft](<../../docs/paperphone.desktop.draft>)。アイコン指定は暫定であり、ICON名とアイコンの提供が確定するまで実装しない。
-- アイコン: 現時点でアイコン素材が無い。GNOMEアイコンテーマへの依存、再配布時のアイコンライセンス・出典確認が必要。
-- AppStreamビジネスメタデータ: 名前・説明・ライセンス・開発者・配布URLは、利用者の決定後に書き込む。
+desktop・アイコン・AppStreamメタデータは`data/`に置き、`meson install`が`share/applications`、`share/metainfo`、`share/icons/hicolor/192x192/apps`へ入れる。アイコンは本リポジトリの`mipmap-xxxhdpi/ic_launcher.png`を無変更で複製したもので、出典は紙アプリPNGと同じ未確定扱い（[migration-inventory.md](<migration-inventory.md>)の素材台帳）。
+
+- desktop: `data/dev.nawashiro.paperphone.desktop`
+- AppStream: `data/dev.nawashiro.paperphone.metainfo.xml`
+- アイコン: `data/dev.nawashiro.paperphone.png`
+
 - AppImageビルド: [tools/build_appimage.py](<../../tools/build_appimage.py>)。Podman/DockerでUbuntu 22.04（glibc 2.35基準）を1コンテナ起動し、GTK 4.14以上・libadwaitaをソースから同梱プレフィックスへ組み、requirements.txt通りのwheelをPython 3.10のvenvに置き、`meson install --destdir` の出力をAppDirへ組み替えてappimagetoolで固める。必要なPython依存とGI機能の一覧は[docs/gnome-dependencies.md](<../../../docs/gnome-dependencies.md>)を参照する。
-- 自動更新は作らない（AppImageUpdate等は後続判断）。
-
 ## クリーン環境での試験項目
 
 クリーン環境はglibc 2.35相当（Ubuntu 22.04）を想定する:

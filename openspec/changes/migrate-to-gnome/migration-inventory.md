@@ -60,7 +60,7 @@
 | PDF用フォント（2点） | `app/src/main/res/font/` | `src/paperphone/resources/fonts/`へ複製。VarelaはJoe Prince / Admix Designs (2011)、Work SansはWork Sans Project Authors (2019)のSIL OFL 1.1。各OFL全文を`resources/licenses/`に同梱。 |
 | 天気記号（7点） | `app/src/main/res/drawable/` | `ic_sunny.xml`、`ic_sun_cloud.xml`、`ic_cloudy.xml`、`ic_rain.xml`、`ic_thunder.xml`、`ic_snow.xml`、`ic_wind.xml`。MET Norwayの未知状態への対応は流用せず、新しい状態マッピングを行う。 |
 | 折り方／導入アニメーション | `app/src/main/res/raw/`、`app/src/main/res/drawable/` | `smiling.json`、`selecting.json`、`loading.json`、`ic_folding_animation.xml`。出典・再配布表示を確定できないためGNOME版へコピーせず、案内内容をGTKネイティブに再構成する。 |
-| アプリ画像・UIベクター | `app/src/main/res/drawable/`、`app/src/main/res/mipmap-*` | Android VectorDrawableはそのまま移さない。天気記号はGNOMEアイコンテーマ等に置換し、配布アイコンはタスク8.3で作成・出典確認する。 |
+| アプリ画像・UIベクター | `app/src/main/res/drawable/`、`app/src/main/res/mipmap-*` | Android VectorDrawableはそのまま移さない。天気記号はGNOMEアイコンテーマ等に置換し、ランチャーアイコンは`mipmap-xxxhdpi/ic_launcher.png`を`data/dev.nawashiro.paperphone.png`へ引き継ぐ。出典は紙アプリPNGと同じ未確定扱いで、配布時に確認する。 |
 | プロジェクト紹介写真 | `190807PaperPhoneStills295-Edit.jpg` | READMEの紹介画像。JPEGメタデータに Colin Ross / Special Projects Studio Ltd. の撮影著作権表記あり。紙面機能の写真素材ではなく、GNOMEアプリ同梱は別途許諾確認。 |
 | 英語・日本語文字列 | `app/src/main/res/values/strings.xml`、`app/src/main/res/values-ja/strings.xml` | 英語原文・日本語45キーをgettextの`po/ja.po`へ移行済み。紙アプリ名13件も同カタログに追加。`po/LINGUAS`、`po/POTFILES.in`、Meson gettextで管理する。 |
 | ライセンス | `LICENSE`、`src/paperphone/resources/licenses/` | リポジトリのApache-2.0とフォントごとのOFL 1.1を台帳化し、OFL全文を同梱。紙アプリPNGの個別由来・写真・アニメーションの扱いは`src/paperphone/resources/README.md`に未確定事項として明記。 |

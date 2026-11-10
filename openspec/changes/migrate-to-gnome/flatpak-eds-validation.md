@@ -20,4 +20,4 @@
 
 ## 判断
 
-ホストEDS読取はバス全開放やホームアクセスなしで成立したため、Flatpakを配布候補として維持する。アプリのmanifestには上記3つの`talk-name`だけを追加し、`filesystem=home`、全セッションバス許可、EDSへの書込APIを追加しない。最終manifestと配布ランタイムでの再確認はタスク8.3で行う。
+ホストEDS読取はバス全開放やホームアクセスなしで成立したため、 Flatpakを配布候補として維持する。アプリのmanifestには上記3つの`talk-name`だけを追加し、`filesystem=home`、全セッションバス許可、EDSへの書込APIを追加しない。

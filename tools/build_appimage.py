@@ -230,21 +230,11 @@ def collect_appdir():
         shutil.copytree(schemas, APPDIR / "share" / "glib-2.0" / "schemas",
                         symlinks=True, dirs_exist_ok=True)
     # appimagetoolはdesktop・Iconを実AppDir直下で探す(root直下一覧のみ)。
-    # 配布用アプリIDは暫定(migrate-to-gnome 8.3で確定)。埋めるアイコンも暫定置き。
-    app_id = "com.withgoogle.experiments.unplugged"
-    shutil.copy2(REPO / "src" / "paperphone" / "resources" / "paper-apps" /
-                 "pigeon_origami.png", APPDIR / f"{app_id}.png")
-    desktop = APPDIR / f"{app_id}.desktop"
-    desktop.write_text(
-        "[Desktop Entry]\n"
-        "Type=Application\n"
-        f"Icon={app_id}\n"
-        "Name=Paper Phone\n"
-        "Name[ja]=ペーパーフォン\n"
-        "Exec=paperphone\n"
-        "Terminal=false\n"
-        "Categories=GNOME;GTK;Utility;\n"
-    )
+    app_id = "dev.nawashiro.paperphone"
+    shutil.copy2(STAGE / "usr/share/applications" / f"{app_id}.desktop",
+                 APPDIR / f"{app_id}.desktop")
+    shutil.copy2(STAGE / "usr/share/icons/hicolor/192x192/apps" / f"{app_id}.png",
+                 APPDIR / f"{app_id}.png")
 
 
 def bundle_runtime_libs():

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SPDX-License-Identifier: FSFAP
+  アプリ本体のライセンスはリポジトリのApache-2.0に従う。
+  AppStream 1.0.4（AppImageビルドが同梱する版）の書式に合わせる。
+-->
+<component type="desktop-application">
+  <id>dev.nawashiro.paperphone</id>
+  <name>Paper Phone</name>
+  <summary>Compose today's information into a printable fold-up booklet</summary>
+  <summary xml:lang="ja">今日の情報を折り畳んで印刷できる冊子にまとめる</summary>
+  <description>
+    <p>
+      Paper Phone composes an offline booklet of your day: contacts, events,
+      TODOs, weather and a walking map, printed as a foldable A4 sheet.
+    </p>
+    <p xml:lang="ja">
+      連絡先・予定・TODO・天気・歩行地図をA4の折り畳み冊子にまとめて印刷します。
+    </p>
+  </description>
+  <developer_name>nawashiro</developer_name>
+  <update_contact>nawashiro@nawashiro.dev</update_contact>
+  <metadata_license>FSFAP</metadata_license>
+  <project_license>Apache-2.0</project_license>
+  <launchable type="desktop-id">dev.nawashiro.paperphone.desktop</launchable>
+  <url type="homepage">https://github.com/nawashiro/paperphone</url>
+  <content_rating type="oars-1.1" />
+</component>

@@ -10,8 +10,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Adw, Gio
 
-# 配布用IDはタスク8.3で確定する。ここでは既存Android IDを暫定利用する。
-APPLICATION_ID = "com.withgoogle.experiments.unplugged"
+APPLICATION_ID = "dev.nawashiro.paperphone"
 
 
 class PaperPhoneApplication(Adw.Application):

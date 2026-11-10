@@ -9,6 +9,7 @@ python = import('python').find_installation(required: true)
 gtk4 = dependency('gtk4', version: '>=4.14')
 libadwaita = dependency('libadwaita-1', version: '>=1.0')
 subdir('po')
+subdir('data')
 
 # GIの実行時名前空間が利用可能であることも構成時に確認する。
 gi_check = run_command(
