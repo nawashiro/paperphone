@@ -4,7 +4,7 @@
 
 - [x] 1.1 Ubuntu 22.04ベースのビルドコンテナに、GTK 4.14以上・libadwaita・その他ネイティブ依存の同梱ビルドと `meson install --destdir build/stage` 出力のAppDir変換を一続きのスクリプトとして整える。テスト: スクリプトの再実行で同じ構成のAppImageが作られる。
 - [x] 1.2 `requirements.txt` 通りのPython同梱とGI接続（`gi.require_versions` と Cairo/Poppler類）をAppDir内で検査し、docs/gnome-dependencies.md の機能一覧と照合する。テスト: AppImageのPythonから全GI読み込みが成功する。
-- [ ] 1.3 同梱する日本語フォールバックフォントと証明書、GLibスキーマのコンパイル済み配置を検査する。テスト: AppImage起動時にGSettingsへの書込がアプリ設定の専用ファイルに矛盾しない。
+- [x] 1.3 同梱する日本語フォールバックフォントと証明書、GLibスキーマのコンパイル済み配置を検査する。テスト: AppImage起動時にGSettingsへの書込がアプリ設定の専用ファイルに矛盾しない。
 
 ## 2. 実行時の接続と案内
 

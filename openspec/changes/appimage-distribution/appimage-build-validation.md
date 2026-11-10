@@ -39,6 +39,7 @@ import osmium, shapely, rapidfuzz, cairo, icalendar, dateutil.rrule"
 - 日本語: jaのpaperphone.moを `lib/python3/dist-packages/paperphone/resources/locale` に同梱。
 - GSettingsスキーマ: GTK・libadwaita由来のschemasと `gschemas.compiled` を `share/glib-2.0/schemas` に同梱。
 - 日本語フォールバックフォントは同梱せず、ホストのfontconfigに委ねる。Ubuntu Desktopにはfonts-noto-cjkが付属する一方、フォントのフル同梱はAppImageの大幅な膨張やキャッシュ管理の二重化を招くため、最小構成を選んだ。
+- GSettingsの書込競合: アプリの設定はGSettingsではなく専用ファイル（`$XDG_CONFIG_HOME/paperphone/settings.json`、PAPERPHONE_CONFIG_DIR上書き可能）に0600で書く。AppImage起動試験（1.2のxvfb実行）でGSettings由来の失敗やschema source不在の警告は現れない。glibの書込先が`XDG_CONFIG_HOME/paperphone`ファイルと矛盾する場面は存在しない。
 
 ## 既知制限
 
