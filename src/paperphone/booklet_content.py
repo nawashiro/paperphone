@@ -221,6 +221,7 @@ def core_painters(snapshot: GenerationSnapshot, *, name: str,
                 else:
                     y = 28 + index * 22
                     ctx.set_line_width(.5)
+                    ctx.new_sub_path()
                     ctx.arc(2.9, y + 8.5, 2.9, 0, 2 * math.pi)
                     ctx.stroke()
                     _text(ctx, fields.get("title", ""), 16, y, width - 16, 9,
@@ -232,6 +233,7 @@ def core_painters(snapshot: GenerationSnapshot, *, name: str,
                 count = min(3 if len(rows) < 7 else max(0, 9 - len(rows)),
                             max(0, int((height - 28 - min(len(rows), capacity) * 22) // 20)))
                 for index in range(count):
+                    ctx.new_sub_path()
                     ctx.arc(2.9, 36.5 + min(len(rows), capacity) * 22 + index * 20,
                             2.9, 0, 2 * math.pi)
                     ctx.stroke()

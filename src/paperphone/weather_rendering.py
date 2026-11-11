@@ -59,6 +59,7 @@ def draw_weather_glyph(context, code: str | None, *, x: float, y: float) -> bool
         context.translate(x, y)
         context.set_line_width(.7)
         if code.startswith(("clearsky", "fair")):
+            context.new_sub_path()
             context.arc(9.5, 9.5, 4, 0, 2 * math.pi)
             context.stroke()
             for angle in range(0, 360, 45):

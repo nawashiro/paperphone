@@ -69,6 +69,29 @@ class WeatherRenderingTests(unittest.TestCase):
         self.assertTrue(draw_weather_glyph(context, "clearsky_day", x=0, y=0))
         self.assertNotEqual(bytes(surface.get_data()), before)
 
+    def test_consecutive_clearsky_glyphs_are_not_connected_by_stray_lines(self):
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 100, 120)
+        context = cairo.Context(surface)
+        context.set_source_rgb(1, 1, 1)
+        context.paint()
+        context.set_source_rgb(0, 0, 0)
+        self.assertTrue(draw_weather_glyph(context, "clearsky_day", x=10, y=10))
+        self.assertTrue(draw_weather_glyph(context, "clearsky_day", x=10, y=60))
+        surface.flush()
+        data = bytes(surface.get_data())
+        stride = surface.get_stride()
+
+        def ink(x0, y0, x1, y1):
+            for y in range(round(y0), round(y1)):
+                row = y * stride
+                for x in range(round(x0), round(x1)):
+                    if data[row + x * 4] < 100 and data[row + x * 4 + 1] < 100:
+                        return True
+            return False
+
+        self.assertTrue(ink(12, 24, 28, 30))   # 光線は描けている（正の対照）。
+        self.assertFalse(ink(0, 35, 100, 55))  # 2つの記号のあいだに線を引かない。
+
     def test_compact_footer_never_uses_less_than_6_5_points(self):
         from unittest.mock import patch
         from paperphone import weather_rendering

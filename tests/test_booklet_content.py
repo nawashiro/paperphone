@@ -7,6 +7,7 @@ import unittest
 from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
+import cairo
 import gi
 gi.require_version("Poppler", "0.18")
 from gi.repository import Gio, GLib, Poppler
@@ -220,6 +221,41 @@ class BookletContentTests(unittest.TestCase):
         self.assertIn("PHONE", text)
         self.assertNotIn("見本の", text)
         self.assertEqual(result.warnings, ())
+
+    def test_todo_circles_have_no_connector_lines(self):
+        # TASKS区画はAndroid正本のTasksModuleと同じ位置・間隔で、円は結ばれない。
+        source = snapshot([item("undated", {"title": "Task", "due": ""}, uid=f"t{i}")
+                           for i in range(3)])
+        result = render_core_booklet(source, name="Fixture")
+        self.assertEqual(result.warnings, ())
+        stream = Gio.MemoryInputStream.new_from_bytes(GLib.Bytes.new(result.pdf))
+        doc = Poppler.Document.new_from_stream(stream, len(result.pdf), None, None)
+        page = doc.get_page(0)
+        width, height = page.get_size()
+        surface = cairo.ImageSurface(cairo.FORMAT_RGB24, round(width * 2), round(height * 2))
+        context = cairo.Context(surface)
+        context.set_source_rgb(1, 1, 1)
+        context.paint()
+        context.scale(2, 2)
+        page.render(context)
+        surface.flush()
+        data = bytes(surface.get_data())
+        stride = surface.get_stride()
+
+        def ink(x0, y0, x1, y1):
+            # TASKS区画の原点は(448, 28)・回転なし。引数は区画内のポイント。
+            for py in range(round((28 + y0) * 2), round((28 + y1) * 2)):
+                row = py * stride
+                for px in range(round((448 + x0) * 2), round((448 + x1) * 2)):
+                    if data[row + px * 4] < 100 and data[row + px * 4 + 1] < 100:
+                        return True
+            return False
+
+        self.assertTrue(ink(0, 33, 6, 40))    # 円は描けている（正の対照）。
+        self.assertFalse(ink(0, 17, 7, 31))   # 見出しと最初の円の間に線はない。
+        self.assertFalse(ink(5.3, 41, 6.3, 54))    # 円どうしは結ばれない。
+        self.assertFalse(ink(5.3, 85, 6.3, 98))    # 項目円と予備円の間も結ばれない。
+        self.assertFalse(ink(5.3, 107, 6.3, 118))  # 予備円どうしも結ばれない。
 
     def test_missing_bundled_fonts_raise_safe_error(self):
         with patch("paperphone.booklet_content.register_printing_fonts", return_value=False):
