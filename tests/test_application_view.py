@@ -658,6 +658,17 @@ class ApplicationViewTests(unittest.TestCase):
         for toggle, _message in view._section_headers:
             self.assertIn("flat", toggle.get_css_classes())
 
+    def test_weather_section_shows_attribution_once(self):
+        self.available()
+        view = self.view()
+        view.contact_entry.set_text("fixture-contact")
+        view._apply_contact()
+        # MET Norwayの帰属はforecast_details（weather_lines）の1か所だけ。
+        parent = view.weather_box.get_parent()
+        first = parent.get_first_child()
+        self.assertIs(first, view.weather_box)
+        self.assertIsNone(first.get_next_sibling())
+
     def test_construction_refreshes_saved_selection_once(self):
         from paperphone.application_view import save_settings_file, settings_file
         self.available()

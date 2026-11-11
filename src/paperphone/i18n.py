@@ -62,9 +62,11 @@ def gettext_for(language: str | None = None):
     if localedir is None:
         localedir = str(files("paperphone").joinpath("resources", "locale"))
     selected = language_code(language)
-    return gettext.translation(
+    raw = gettext.translation(
         DOMAIN,
         localedir=localedir,
         languages=[selected],
         fallback=True,
     ).gettext
+    # 空文字列はカタログのヘッダーに化けるので、翻訳せずそのまま返す。
+    return lambda message: raw(message) if message else ""

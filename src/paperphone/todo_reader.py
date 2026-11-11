@@ -14,6 +14,7 @@ gi.require_version("GLib", "2.0")
 from gi.repository import Gio, GLib
 
 from .eds import EDSClientHandle, EDSRegistryAdapter, EDSResult, EDSState, SourceKind
+from .i18n import language_code
 from .selection import ItemKey, SelectableItem
 from .temporal import DateOnly, FloatingDateTime, TemporalValue, ZonedDateTime, to_system_local
 from .todo import TodoBucket, TodoInput
@@ -62,8 +63,8 @@ class TodoRecord:
             bucket.value,
             {
                 "title": self.summary,
-                "start": format_temporal(self.start, system_tz),
-                "due": format_temporal(self.due, system_tz),
+                "start": _snapshot_temporal(self.start, system_tz),
+                "due": _snapshot_temporal(self.due, system_tz),
             },
         )
 
@@ -162,13 +163,22 @@ def parse_todos(payloads: Iterable[str | bytes], *, source_uid: str) -> tuple[To
     )
 
 
+def _snapshot_temporal(value: TemporalValue | None, system_tz: tzinfo) -> str:
+    """紙面の解析に耐えるISO形式を保つ。UIの表示語はformat_temporalに任せる。"""
+    if value is None:
+        return ""
+    return to_system_local(value, system_tz=system_tz).isoformat()
+
+
 def format_temporal(value: TemporalValue | None, system_tz: tzinfo) -> str:
     """日付だけは維持し、時刻付き値はシステム時刻へ変換して表示する。"""
     if value is None:
         return ""
     local = to_system_local(value, system_tz=system_tz)
     if isinstance(local, datetime):
-        return local.strftime("%Y-%m-%d %H:%M")
+        if language_code() == "ja":
+            return local.strftime("%Y年%m月%d日 %H:%M")
+        return local.strftime("%b %d, %Y, %I:%M %p")
     return local.isoformat()
 
 

@@ -52,6 +52,18 @@ class WeatherLocationViewTests(unittest.TestCase):
                     view.close()
 
 
+    def test_ready_state_does_not_show_the_catalog_header(self):
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+        from paperphone.weather_location import WeatherLocationResult
+        client = Mock()
+        view = WeatherLocationView(client, clock=lambda: datetime(2026, 11, 8, 9, tzinfo=ZoneInfo("Asia/Tokyo")))
+        try:
+            view._changed(WeatherLocationResult(S.READY, forecast=None))
+            self.assertEqual(view.status.get_text(), "")
+        finally:
+            view.close()
+
     def test_no_fetch_after_last_window_and_plain_message(self):
         from datetime import datetime
         from zoneinfo import ZoneInfo

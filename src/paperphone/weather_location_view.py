@@ -43,7 +43,7 @@ class WeatherLocationView(Gtk.Box):
         self.description = Gtk.Label(label=_("Location and client contact are sent to MET Norway."))
         self.description.set_wrap(True)
         # 空文字列を _() に渡すとカタログのヘッダーが返るので、素の空にしておく。
-        self.status = Gtk.Label(label=_("") if MESSAGES[State.IDLE] else "")
+        self.status = Gtk.Label(label=_(MESSAGES[State.IDLE]))
         self.status.set_wrap(True)
         self.request_button = Gtk.Button(label=_("Fetch weather"))
         self.request_button.connect("clicked", self._request)

@@ -310,11 +310,11 @@ msgstr "地図データを削除しました。"
 
 #: src/paperphone/application_view.py:54
 msgid "Map data could not be deleted."
-msgstr "ローカルの道路データを読み込めません。"
+msgstr "地図データを削除できませんでした。"
 
 #: src/paperphone/application_view.py:55
 msgid "Settings could not be saved."
-msgstr "更新を開始できませんでした。"
+msgstr "設定を保存できませんでした。"
 
 #: src/paperphone/application_view.py:56
 msgid "photo: excluded"
@@ -541,7 +541,7 @@ msgstr "印刷を取り消しました。PDFはそのままです。"
 
 #: src/paperphone/pdf_output.py:305
 msgid "Print operation accepted. Physical printing is not confirmed."
-msgstr "印刷操作を受け付けました。実際の印刷が済んだかはらわかりません。"
+msgstr "印刷操作を受け付けました。実際の印刷が済んだかはわかりません。"
 
 #: src/paperphone/osm_region_view.py:22 src/paperphone/osm_region_view.py:23
 msgid "Download failed."
@@ -549,7 +549,7 @@ msgstr "ダウンロードに失敗しました。"
 
 #: src/paperphone/osm_region_view.py:24
 msgid "Extract unavailable."
-msgstr "天気を取得しました。"
+msgstr "抽出版を利用できません。"
 
 #: src/paperphone/osm_region_view.py:25
 msgid "Access denied."
@@ -557,7 +557,7 @@ msgstr "拒否されました。"
 
 #: src/paperphone/osm_region_view.py:26
 msgid "Rate limited."
-msgstr "要求が絞られています。"
+msgstr "要求が制限されています。"
 
 #: src/paperphone/osm_region_view.py:27
 msgid "Wait before retrying."
@@ -565,7 +565,7 @@ msgstr "少し待ってからもう一度試してください。"
 
 #: src/paperphone/osm_region_view.py:28
 msgid "Downloaded data is invalid."
-msgstr "経路の探索範囲が不正です。"
+msgstr "ダウンロードしたデータが不正です。"
 
 #: src/paperphone/osm_region_view.py:29
 msgid "Saved data is damaged."
@@ -573,7 +573,7 @@ msgstr "保存してある地図データが壊れています。"
 
 #: src/paperphone/osm_region_view.py:30
 msgid "Save failed."
-msgstr "ソースにアクセスできません。"
+msgstr "保存に失敗しました。"
 
 #: src/paperphone/osm_region_view.py:31
 msgid "Unexpected redirect."
@@ -581,7 +581,7 @@ msgstr "想定外の転送でした。"
 
 #: src/paperphone/osm_region_view.py:32
 msgid "Not confirmed."
-msgstr ""
+msgstr "確認が取れていません。"
 
 #: src/paperphone/osm_region_view.py:33
 msgid "Map data could not be prepared."
@@ -606,7 +606,7 @@ msgstr "位置情報を取れませんでした。"
 
 #: src/paperphone/osm_region_view.py:191 src/paperphone/osm_region_view.py:197
 msgid "Deleted."
-msgstr "写真を選びました。"
+msgstr "削除しました。"
 
 #: src/paperphone/place_selection.py:34
 msgid "Use current location as departure"
@@ -656,7 +656,7 @@ msgstr "ローカルの場所を検索しています…"
 
 #: src/paperphone/place_selection.py:232
 msgid "Search failed."
-msgstr "ソースにアクセスできません。"
+msgstr "検索に失敗しました。"
 
 #: src/paperphone/place_selection.py:233
 msgid "No local places found."
@@ -787,7 +787,7 @@ msgstr "位置情報サービスから、使えない座標が返りました。
 
 #: src/paperphone/weather_location_view.py:27
 msgid "Weather fetch failed."
-msgstr "天気を取得しました。"
+msgstr "天気を取得できませんでした。"
 
 #: src/paperphone/weather_location_view.py:30
 msgid "No forecast left for today."
@@ -976,7 +976,7 @@ msgstr "夕方"
 #: src/paperphone/weather_sheet.py:194
 #, python-brace-format
 msgid "{t} °C"
-msgstr ""
+msgstr "{t} °C"
 
 #: src/paperphone/weather_sheet.py:195 src/paperphone/weather_rendering.py:30
 msgid "Unknown weather condition"

@@ -25,7 +25,6 @@ from .refresh import RefreshState
 from .selection import GenerationSnapshot, SelectionModel
 from .todo import next_todo_reassessment
 from .todo_selection import TodoSelectionView
-from .weather import ATTRIBUTION_SHORT
 from .weather_location import WeatherLocationState
 from .weather_location_view import WeatherLocationView
 from .weather_sheet import build_weather_sheet, weather_lines
@@ -313,7 +312,6 @@ class ApplicationView(Gtk.Box):
         box = self._box()
         self.weather_box = self._box()
         box.append(self.weather_box)
-        box.append(Gtk.Label(label=ATTRIBUTION_SHORT, wrap=True, xalign=0))
         return box
 
     def _map_section(self, region_factory, place_factory):

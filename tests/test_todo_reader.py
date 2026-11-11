@@ -15,6 +15,8 @@ from paperphone.todo import TodoBucket
 from paperphone.todo_reader import (
     ALL_TODOS_QUERY,
     TodoListReadAdapter,
+    TodoRecord,
+    format_temporal,
     parse_todos,
 )
 
@@ -50,6 +52,20 @@ class FakeTaskListRegistry:
 
 
 class TodoVCardParserTest(unittest.TestCase):
+    def test_temporal_display_is_locale_readable_and_snapshot_stays_iso(self):
+        from paperphone.i18n import using_language
+
+        due = ZonedDateTime(datetime(2026, 11, 10, 17, 30, tzinfo=ZoneInfo("Asia/Tokyo")))
+        record = TodoRecord("book", "todo", "Fixture task", None, due)
+        zone = ZoneInfo("Asia/Tokyo")
+        item = record.as_selectable_item(TodoBucket.TODAY, system_tz=zone)
+        # 紙面・スナップショットの解析はISOのまま。表示語だけが人間向けに変わる。
+        self.assertEqual(item.fields["due"], "2026-11-10T17:30:00+09:00")
+        with using_language("ja"):
+            self.assertEqual(format_temporal(due, zone), "2026年11月10日 17:30")
+        with using_language("en"):
+            self.assertEqual(format_temporal(due, zone), "Nov 10, 2026, 05:30 PM")
+
     def test_parses_date_only_zoned_and_floating_values(self):
         date_only = vtodo(
             "todo-date-only",
