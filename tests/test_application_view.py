@@ -614,6 +614,64 @@ class ApplicationViewTests(unittest.TestCase):
         self.assertEqual(len(view.source_checks), count)
         self.assertTrue(view.contacts.checkbox_for(self.contact.key).get_active())
 
+    def test_dialogs_have_a_visible_close_button(self):
+        view = self.view()
+        for dialog in (view.sources_dialog, view.settings_dialog):
+            buttons = [w for w in self.descendants(dialog.get_child())
+                       if isinstance(w, Gtk.Button) and w.get_label() == "Close"]
+            self.assertEqual(len(buttons), 1, dialog.get_title())
+            buttons[0].emit("clicked")
+
+    def test_source_list_is_scrolled_and_controls_stay_reachable(self):
+        self.available()
+        view = self.view()
+        self.sources(view)
+        scroller = view.source_box.get_ancestor(Gtk.ScrolledWindow)
+        self.assertIsInstance(scroller, Gtk.ScrolledWindow)
+        self.assertGreaterEqual(scroller.get_max_content_height(), 300)
+        # Refresh・Cancelはスクロールの外、常に押せる。
+        self.assertNotIsInstance(view.refresh_button.get_parent(), Gtk.ScrolledWindow)
+        for index in range(50):
+            view.add_source(SourceDescriptor(f"uid-{index}", f"Fixture {index}",
+                                             SourceKind.ADDRESS_BOOK, True))
+        self.assertEqual(view.source_box.get_ancestor(Gtk.ScrolledWindow), scroller)
+        self.assertTrue(view.refresh_button.get_sensitive())
+        self.assertFalse(view.cancel_button.get_sensitive())
+
+    def test_delete_map_data_is_a_separate_danger_section(self):
+        view = self.view()
+        box = view.delete_data_button.get_parent()
+        items = []
+        child = box.get_first_child()
+        while child is not None:
+            items.append(child)
+            child = child.get_next_sibling()
+        position = items.index(view.delete_data_button)
+        heading, separator = items[position - 1], items[position - 2]
+        self.assertEqual(heading.get_label(), "Danger zone")
+        self.assertIn("heading", heading.get_css_classes())
+        self.assertIsInstance(separator, Gtk.Separator)
+        self.assertLess(items.index(view.apply_contact_button), position - 2)
+
+    def test_section_headings_do_not_wear_button_chrome(self):
+        view = self.view()
+        for toggle, _message in view._section_headers:
+            self.assertIn("flat", toggle.get_css_classes())
+
+    def test_construction_refreshes_saved_selection_once(self):
+        from paperphone.application_view import save_settings_file, settings_file
+        self.available()
+        save_settings_file(settings_file(), {
+            "version": 1, "sources": [[SourceKind.ADDRESS_BOOK.value, "ADDRESS_BOOK"]]})
+        view = self.view()
+        refresh_calls = [c for c in self.services.calls
+                         if isinstance(c, tuple) and c[0] == "refresh"]
+        self.assertEqual(len(refresh_calls), 1)
+        # 自動の再取得は一度だけ。追加の自動再試行はしない。
+        view._auto_refresh()
+        self.assertEqual(len([c for c in self.services.calls
+                              if isinstance(c, tuple) and c[0] == "refresh"]), 1)
+
     def test_missing_eds_services_show_one_short_guidance(self):
         class NoBus(Services):
             def connect(self, callback):

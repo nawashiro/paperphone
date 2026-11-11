@@ -88,6 +88,7 @@ class PlaceSelectionView(Gtk.Box):
             box.remove(child)
 
     def _set_busy(self, busy):
+        """派生データの読込中だけ入力を止める。検索では止めない。"""
         for entry in self.entries.values():
             entry.set_sensitive(not busy and self.index is not None)
         self._busy = busy
@@ -95,6 +96,13 @@ class PlaceSelectionView(Gtk.Box):
         # 派生データの読込中は進行を随時束ねる。
         self.progress.set_visible(busy)
         if busy:
+            self.progress.pulse()
+
+    def _set_searching(self, searching):
+        """検索中も検索欄の入力とフォーカスを保つ。進行はバーで示す。"""
+        self._busy = searching
+        self.progress.set_visible(searching)
+        if searching:
             self.progress.pulse()
 
     def _in_scope(self, place):
@@ -206,7 +214,7 @@ class PlaceSelectionView(Gtk.Box):
         if not query:
             self._say(_("Enter a place name."))
             return
-        self._set_busy(True)
+        self._set_searching(True)
         self._say(_("Searching local places…"))
 
         def work():

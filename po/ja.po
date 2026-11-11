@@ -294,6 +294,12 @@ msgstr "今日の予定はありません。"
 msgid "Photo selection is still in progress."
 msgstr "写真の選択と読み込みがまだ終わっていません。"
 
+msgid "Close"
+msgstr "閉じる"
+
+msgid "Danger zone"
+msgstr "危険な操作"
+
 #: src/paperphone/application_view.py:54 src/paperphone/osm_region_view.py:56
 msgid "Delete stored map data"
 msgstr "地図データを削除"

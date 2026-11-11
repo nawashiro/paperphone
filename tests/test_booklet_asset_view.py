@@ -309,6 +309,10 @@ class AssetSelectionViewTests(unittest.TestCase):
         self.assertNotIn("secret", self.view.status.get_text())
         self.assertIsNone(self.view.capture_choices().photo)
 
+    def test_preview_reserves_visible_height(self):
+        _width, height = self.view.preview.get_size_request()
+        self.assertGreaterEqual(height, 240)
+
 
 if __name__ == "__main__":
     unittest.main()

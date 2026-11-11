@@ -40,6 +40,23 @@ class ContactSelectionViewTest(unittest.TestCase):
         self.assertEqual(selection.selected_keys, (first.key,))
         self.assertFalse(selection.is_selected(second.key))
 
+    def test_eight_contacts_are_browsable_and_selectable(self):
+        contacts = tuple(
+            self.contact("book", f"contact-{index}", f"Fixture Contact {index}", f"+1-555-{index:04d}")
+            for index in range(8)
+        )
+        selection = SelectionModel()
+        view = ContactSelectionView(selection)
+        view.set_contacts(contacts)
+
+        scroller = view._list.get_ancestor(Gtk.ScrolledWindow)
+        self.assertIsInstance(scroller, Gtk.ScrolledWindow)
+        self.assertGreaterEqual(scroller.get_max_content_height(), 300)
+        for contact in contacts:
+            self.assertTrue(view.checkbox_for(contact.key).get_sensitive())
+        view.checkbox_for(contacts[7].key).set_active(True)
+        self.assertEqual(len(view.selected_contacts), 1)
+
     def test_selection_limit_matches_booklet_capacity(self):
         contacts = tuple(
             self.contact("book", f"contact-{index}", f"Fixture Contact {index}", f"+1-555-{index:04d}")

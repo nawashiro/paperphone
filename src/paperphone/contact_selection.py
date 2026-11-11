@@ -57,6 +57,9 @@ class ContactSelectionView(Gtk.Box):
         scroller = Gtk.ScrolledWindow()
         scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scroller.set_child(self._list)
+        # 選択上限の7件が見える高さを確保し、それを超える分はスクロールで見る。
+        scroller.set_max_content_height(320)
+        scroller.set_propagate_natural_height(True)
         scroller.set_vexpand(True)
         self.append(scroller)
 

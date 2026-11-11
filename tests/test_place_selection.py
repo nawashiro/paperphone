@@ -110,6 +110,29 @@ class PlaceSelectionTests(unittest.TestCase):
         # ジョブは即実行のsubsetで、索引は完成済み。バーが消えることを確認する。
         self.assertFalse(view.progress.get_visible())
 
+    def test_search_keeps_entry_sensitive_between_and_after_queries(self):
+        jobs = []
+        view = self.make(submit=jobs.append)
+        view.entries["start"].set_text("東京駅")
+        view.search("start")
+        # 検索の間も検索欄は押せ続け、打ち直しができる。
+        self.assertTrue(view.entries["start"].get_sensitive())
+        jobs.pop()()
+        self.assertTrue(view.entries["start"].get_sensitive())
+        button = view.results["start"].get_row_at_index(0).get_child()
+        self.assertEqual(button.get_label(), "東京駅")
+
+    def test_index_build_disables_entries_until_ready(self):
+        jobs = []
+        view = self.make(submit=jobs.append)
+        factory = Mock(return_value=view.index)
+        view._submit, view._index_factory = jobs.append, factory
+        view.load_extract(SimpleNamespace(path="fixture.osm.pbf", prefecture=13,
+                                          sha256="a" * 64))
+        self.assertFalse(view.entries["start"].get_sensitive())
+        jobs[0]()
+        self.assertTrue(view.entries["start"].get_sensitive())
+
     def test_new_prefecture_index_clears_previous_endpoints(self):
         view = self.make(LocationFix(35.682, 139.759))
         view.choose("destination", PARK)

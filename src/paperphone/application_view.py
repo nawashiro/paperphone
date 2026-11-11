@@ -53,6 +53,7 @@ MESSAGES = (
     N_("Photo selection is still in progress."),
     N_("Delete stored map data"), N_("Map data deleted."), N_("Map data could not be deleted."),
     N_("Settings could not be saved."),
+    N_("Close"), N_("Danger zone"),
     N_("photo: excluded"), N_("weather: excluded"), N_("map: excluded"), N_("{source}: excluded"),
     N_("Map failure: {reason}"), N_("Task List"), N_("Address Book"),
 )
@@ -149,6 +150,7 @@ class ApplicationView(Gtk.Box):
         self._saved_sources = ()
         self._saved_selection = ()
         self._selection_restored = False
+        self._auto_refreshed = False
         self._save_pending = None
         self._generation_progresspulse = None
         self._weather_factory = weather_factory
@@ -206,6 +208,9 @@ class ApplicationView(Gtk.Box):
         settings.append(self._label(MESSAGES[4]))
         self.apply_contact_button = self._button(MESSAGES[5], self._apply_contact)
         settings.append(self.apply_contact_button)
+        # 削除は保存系の操作から距離を置いた別セクションに置き、誤押しを避ける。
+        settings.append(Gtk.Separator())
+        settings.append(self._heading("Danger zone"))
         self.delete_data_button = self._button("Delete stored map data", self._delete_map_data)
         settings.append(self.delete_data_button)
         self.settings_dialog = self._dialog("Settings", settings)
@@ -224,7 +229,13 @@ class ApplicationView(Gtk.Box):
         # グループ名を引数のプロパティとして付ける。
         self.source_box.update_property([Gtk.AccessibleProperty.LABEL],
                                         [self.tr("Sources")])
-        sources.append(self.source_box)
+        # 件数が増えても対話が伸びず、下段の操作は常に押せる。超過はスクロールで見る。
+        source_scroller = Gtk.ScrolledWindow()
+        source_scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        source_scroller.set_child(self.source_box)
+        source_scroller.set_max_content_height(320)
+        source_scroller.set_propagate_natural_height(True)
+        sources.append(source_scroller)
         self.sources_dialog = self._dialog("Sources", sources)
 
         self._section("Contacts", self._contact_section())
@@ -351,9 +362,16 @@ class ApplicationView(Gtk.Box):
         child.set_margin_bottom(12)
         child.set_margin_start(18)
         child.set_margin_end(18)
+        content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        content.append(child)
+        close = Gtk.Button(label=self.tr("Close"))
+        self._bindings.append((close, "Close"))
+        close.set_halign(Gtk.Align.END)
+        close.connect("clicked", lambda _b: dialog.close())
+        content.append(close)
         dialog = Adw.Dialog()
         dialog.set_title(self.tr(title))
-        dialog.set_child(child)
+        dialog.set_child(content)
         return dialog
 
     def _show_settings_dialog(self):
@@ -361,6 +379,11 @@ class ApplicationView(Gtk.Box):
 
     def _show_sources_dialog(self):
         self.sources_dialog.present(self.get_root())
+
+    def _heading(self, message):
+        label = self._label(message)
+        label.add_css_class("heading")
+        return label
 
     def _reveal_section(self, title):
         for widget, message in self._section_headers:
@@ -376,8 +399,11 @@ class ApplicationView(Gtk.Box):
         revealer.set_child(child)
         revealer.set_transition_type(Gtk.RevealerTransitionType.NONE)
         revealer.set_reveal_child(True)
+        # 折りたたみは押せる要素として残すが、タブやボタンと同じ外観にはしない。
         toggle = Gtk.ToggleButton()
         toggle.set_label(self.tr(title))
+        toggle.add_css_class("flat")
+        toggle.set_halign(Gtk.Align.START)
         toggle.set_active(True)
         toggle.connect("toggled", lambda b, r=revealer: r.set_reveal_child(b.get_active()))
         self._section_headers.append((toggle, title))
@@ -499,6 +525,8 @@ class ApplicationView(Gtk.Box):
                     self._registry_failure(kind, result.state)
                 remaining.discard(kind)
                 self._listing = bool(remaining)
+                if not remaining:
+                    self._auto_refresh()
             for kind in SourceKind:
                 try:
                     self.services.list_sources_async(kind, lambda result, _data, k=kind: listed(k, result))
@@ -655,6 +683,14 @@ class ApplicationView(Gtk.Box):
     def cancel_refresh(self):
         if self._refresh_job is not None:
             self._refresh_job.cancel()
+
+    def _auto_refresh(self):
+        """列挙完了後、保存済み選択の再取得を一度だけ手動操作の代わりに行う。"""
+        if self._auto_refreshed or self._closed or not self._saved_sources:
+            return
+        self._auto_refreshed = True
+        if self.selected_sources():
+            self.refresh_sources()
 
     def _rebuild_personal(self):
         now, zone = self.services.clock(), self.services.timezone()

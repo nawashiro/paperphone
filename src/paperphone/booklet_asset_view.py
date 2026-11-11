@@ -76,6 +76,7 @@ class AssetSelectionView(Gtk.Box):
         self.choose_photo_button.connect("clicked", self._choose_photo)
         self.clear_photo_button.connect("clicked", lambda _button: self.clear_photo())
         self.preview = Gtk.Image()
+        self.preview.set_size_request(-1, 240)
         self.preview.set_hexpand(True)
         self.preview.set_vexpand(True)
         self.preview.set_visible(False)
